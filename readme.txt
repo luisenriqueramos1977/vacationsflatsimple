@@ -4,4 +4,5 @@ python -m venv myvenv
 myvenv\Scripts\activate
 pip install Django 
 django-admin startproject holidayapartment
-python manage.py startapp crud_api_project
+python manage.py startapp crud_api
+python manage.py runserver
