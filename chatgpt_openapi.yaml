@@ -1,0 +1,368 @@
+openapi: 3.0.3
+info:
+  title: Holiday Apartments API
+  description: API for managing holiday apartments, bookings, and reviews.
+  version: 1.0.0
+
+servers:
+  - url: https://api.holidayapartments.com
+    description: Production Server
+  - url: https://staging.api.holidayapartments.com
+    description: Staging Server
+  - url: https://dev.api.holidayapartments.com
+    description: Development Server
+
+paths:
+  /owners:
+    post:
+      summary: Create a new owner account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Owner'
+      responses:
+        '201':
+          description: Owner account created successfully.
+    get:
+      summary: Get all owners
+      responses:
+        '200':
+          description: List of owners.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Owner'
+
+  /owners/{ownerId}:
+    get:
+      summary: Get owner by ID
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Owner details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+
+  /owners/{ownerId}/locations:
+    post:
+      summary: Add a new location for an owner
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '201':
+          description: Location added successfully.
+
+    get:
+      summary: Get all locations of an owner
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of locations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+
+  /owners/{ownerId}/apartments:
+    get:
+      summary: Get apartments of an owner
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of apartments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Apartment'
+
+    post:
+      summary: Add apartments for an owner
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Apartment'
+      responses:
+        '201':
+          description: Apartments added successfully.
+
+  /owners/{ownerId}/apartments/{apartmentId}:
+    put:
+      summary: Update an apartment
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: apartmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Apartment'
+      responses:
+        '200':
+          description: Apartment updated successfully.
+
+    delete:
+      summary: Delete an apartment
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: apartmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Apartment deleted successfully.
+
+  /apartments:
+    get:
+      summary: Search for apartments
+      parameters:
+        - name: price
+          in: query
+          schema:
+            type: number
+        - name: availability
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            $ref: '#/components/schemas/Location'
+        - name: evaluation
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: List of apartments matching the criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Apartment'
+
+  /guests:
+    post:
+      summary: Create a new guest account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guest'
+      responses:
+        '201':
+          description: Guest account created successfully.
+
+  /guests/{guestId}/bookings:
+    post:
+      summary: Set a booking
+      parameters:
+        - name: guestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apartmentId:
+                  type: string
+                bookingDate:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Booking created successfully.
+
+    delete:
+      summary: Cancel a booking
+      parameters:
+        - name: guestId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bookingId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Booking canceled successfully.
+
+components:
+  schemas:
+    Owner:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        apartments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Apartment'
+
+    Guest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        bookings:
+          type: array
+          items:
+            type: string
+
+    Apartment:
+      type: object
+      properties:
+        apartmentName:
+          type: string
+        price:
+          type: number
+        rooms:
+          type: integer
+        size:
+          type: number
+        facilities:
+          type: array
+          items:
+            type: string
+        location:
+          $ref: '#/components/schemas/Location'
+
+    Review:
+      type: object
+      properties:
+        apartment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        value:
+          type: integer
+          minimum: 0
+          maximum: 5
+        comment:
+          type: string
+        lastUpdate:
+          type: string
+          format: date-time
+
+    Facility:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        customerWeighting:
+          type: integer
+          minimum: 0
+          maximum: 5
+
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        state:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number

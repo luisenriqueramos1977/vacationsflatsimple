@@ -1,55 +1,47 @@
-from rest_framework import generics
-from .models import Apartment, Guest, Booking, FewoOwner
-from .serializers import ApartmentSerializer, GuestSerializer, BookingSerializer, FewoOwnerSerializer
+# File: api/views.py
+from rest_framework import viewsets, mixins
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import Location, Apartment, Owner, Guest, Review, Booking
+from .serializers import (
+    LocationSerializer,
+    ApartmentSerializer,
+    OwnerSerializer,
+    GuestSerializer,
+    ReviewSerializer,
+    BookingSerializer,
+)
 
-# FewoOwner Views
-class FewoOwnerListView(generics.ListAPIView):
-    queryset = FewoOwner.objects.all()
-    serializer_class = FewoOwnerSerializer
+class LocationViewSet(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated]
 
-class FewoOwnerCreateView(generics.CreateAPIView):
-    queryset = FewoOwner.objects.all()
-    serializer_class = FewoOwnerSerializer
-
-class FewoOwnerRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = FewoOwner.objects.all()
-    serializer_class = FewoOwnerSerializer
-
-# Apartment Views
-class ApartmentListView(generics.ListAPIView):
+class ApartmentViewSet(viewsets.ModelViewSet):
     queryset = Apartment.objects.all()
     serializer_class = ApartmentSerializer
 
-class ApartmentCreateView(generics.CreateAPIView):
-    queryset = Apartment.objects.all()
-    serializer_class = ApartmentSerializer
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
-class ApartmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Apartment.objects.all()
-    serializer_class = ApartmentSerializer
+class OwnerViewSet(viewsets.ModelViewSet):
+    queryset = Owner.objects.all()
+    serializer_class = OwnerSerializer
+    permission_classes = [IsAuthenticated]
 
-# Guest Views
-class GuestListView(generics.ListAPIView):
+class GuestViewSet(viewsets.ModelViewSet):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
+    permission_classes = [IsAuthenticated]
 
-class GuestCreateView(generics.CreateAPIView):
-    queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
 
-class GuestRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
-
-# Booking Views
-class BookingListView(generics.ListAPIView):
+class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
 
-class BookingCreateView(generics.CreateAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
-
-class BookingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
