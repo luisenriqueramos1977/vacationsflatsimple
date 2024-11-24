@@ -11,6 +11,7 @@ from .views import (
     ReviewViewSet,
     BookingViewSet,
     FacilityViewSet,
+    ApartmentBookingsListView,
 )
 
 location_list = LocationViewSet.as_view({
@@ -82,23 +83,23 @@ urlpatterns = [
     path('locations/<int:pk>/', location_detail, name='location-detail'),
     path('apartments/', apartment_list, name='apartment-list'),
     path('apartments/<int:pk>/', apartment_detail, name='apartment-detail'),
+    path('api/apartments/<int:apartment_id>/bookings/', 
+         ApartmentBookingsListView.as_view(), 
+         name='apartment-bookings'),
     path('owners/', owner_list, name='owner-list'),
     path('owners/<int:pk>/', owner_detail, name='owner-detail'),
     path('guests/', guest_list, name='guest-list'),
     path('guests/<int:pk>/', guest_detail, name='guest-detail'),
-    path('api/reviews/', ReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name='review-list'),
-    path('api/reviews/<int:pk>/', ReviewViewSet.as_view({
+    path('reviews/', ReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name='review-list'),
+    path('reviews/<int:pk>/', ReviewViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
         'delete': 'destroy'
     }), name='review-detail'),
     path('bookings/', booking_list, name='booking-list'),
     path('bookings/<int:pk>/', booking_detail, name='booking-detail'),
-    path('api/facilities/', FacilityViewSet.as_view({'get': 'list', 'post': 'create'}), name='facility-list'),
-    path('api/facilities/<int:pk>/', FacilityViewSet.as_view({
-        'get': 'retrieve', 
-        'put': 'update', 
-        'delete': 'destroy'
-    }), name='facility-detail'),
+    # Facilities endpoints
+    path('facilities/', views.FacilityViewSet.as_view({'get': 'list', 'post': 'create'}), name='facility-list'),
+    path('facilities/<int:pk>/', views.FacilityViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='facility-detail'),
 ]
 

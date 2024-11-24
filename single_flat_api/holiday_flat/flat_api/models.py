@@ -1,6 +1,7 @@
 # File: api/models.py
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Location(models.Model):
     name = models.CharField(max_length=255)
@@ -28,13 +29,12 @@ class Picture(models.Model):
     image = models.ImageField(upload_to='apartment_pictures/')
     format = models.CharField(max_length=50, help_text="Format of the image, e.g., JPEG, PNG")
     size = models.PositiveIntegerField(help_text="Size in bytes")
-
+    
 class Owner(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    apartments = models.ManyToManyField(Apartment, related_name="owners")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='owner_profile')
 
     def __str__(self):
-        return self.user.username
+        return self.user.username  # Display the owner's username
 
 class Guest(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -44,19 +44,25 @@ class Guest(models.Model):
 
 class Review(models.Model):
     apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name='reviews')
-    guest = models.ForeignKey('Guest', on_delete=models.CASCADE, related_name='reviews')  # Added guest field
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name='reviews')  # Ensure this line is present
     created_at = models.DateTimeField(auto_now_add=True)
     value = models.IntegerField()
     comment = models.TextField()
     last_update = models.DateTimeField(auto_now=True)
 
 class Booking(models.Model):
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name="bookings")
-    apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name="bookings")
-    booking_date = models.DateField()
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name='bookings')
+    apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name='bookings')
+    start_date = models.DateField()
+    end_date = models.DateField()
 
-    def __str__(self):
-        return f"{self.guest.user.username} - {self.apartment.apartment_name}"
+    def clean(self):
+        if self.end_date <= self.start_date:
+            raise ValidationError("End date must be after start date.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
     
 
 class Facility(models.Model):

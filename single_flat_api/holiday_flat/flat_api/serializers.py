@@ -44,6 +44,11 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = '__all__'
 
+class PublicBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['id', 'apartment', 'start_date', 'end_date']  # Exclude guest
+
 class FacilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Facility

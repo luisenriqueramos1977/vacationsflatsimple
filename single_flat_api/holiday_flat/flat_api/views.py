@@ -15,8 +15,10 @@ from .serializers import (
     BookingSerializer,
     FacilitySerializer,
     PictureSerializer,
+    PublicBookingSerializer
 )
 from rest_framework.exceptions import PermissionDenied  # Add this import
+from rest_framework.generics import ListAPIView
 
 def home(request):
     return render(request, 'home.html')
@@ -113,37 +115,84 @@ class FacilityViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()
     serializer_class = FacilitySerializer
 
-    def get_queryset(self):
+    def get_permissions(self):
         """
-        Return facilities accessible to the current user.
-        If the user is an owner, they can view all facilities.
+        Override the get_permissions method to apply custom permissions.
+        Only owners can create, update, or delete facilities.
         """
-        user = self.request.user
-        if hasattr(user, 'owner_profile'):  # Check if the user has an Owner profile
-            return Facility.objects.all()  # Owners can access all facilities
-        return Facility.objects.none()  # Non-owners cannot access facilities
+        if self.action in ['create', 'update', 'destroy']:
+            # Ensure the user is authenticated
+            permission_classes = [IsAuthenticated]
+            if not self.request.user.is_authenticated:
+                raise PermissionDenied("Authentication required")
+            return permission_classes
+        # Allow anyone to list or retrieve facilities
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         """
-        Set the owner when creating a facility.
+        Override to ensure that the authenticated user is the owner of the apartment
+        before allowing them to create a facility.
         """
-        user = self.request.user
-        if hasattr(user, 'owner_profile'):  # Ensure the user is an Owner
-            serializer.save()
+        apartment_id = self.request.data.get('apartment')  # Get apartment from the request data
+        if not apartment_id:
+            raise PermissionDenied("Apartment is required to attach facility.")
+        
+        try:
+            apartment = Apartment.objects.get(id=apartment_id)
+        except Apartment.DoesNotExist:
+            raise PermissionDenied("Apartment does not exist.")
+        
+        # Check if the user is the owner of the apartment
+        if apartment.location.owner.user != self.request.user:
+            raise PermissionDenied("You must be the owner of this apartment to add a facility.")
+        
+        # Proceed to save the facility
+        serializer.save()
 
     def perform_update(self, serializer):
         """
-        Ensure only owners can update facilities.
+        Override to ensure that the authenticated user is the owner of the apartment
+        before allowing them to update the facility.
         """
-        user = self.request.user
-        if hasattr(user, 'owner_profile'):  # Check if the user is an Owner
-            serializer.save()
+        apartment_id = self.request.data.get('apartment')  # Get apartment from the request data
+        if not apartment_id:
+            raise PermissionDenied("Apartment is required to update facility.")
+        
+        try:
+            apartment = Apartment.objects.get(id=apartment_id)
+        except Apartment.DoesNotExist:
+            raise PermissionDenied("Apartment does not exist.")
+        
+        # Check if the user is the owner of the apartment
+        if apartment.location.owner.user != self.request.user:
+            raise PermissionDenied("You must be the owner of this apartment to update a facility.")
+        
+        # Proceed to save the facility
+        serializer.save()
 
     def perform_destroy(self, instance):
         """
-        Ensure only owners can delete facilities.
+        Override to ensure that the authenticated user is the owner of the apartment
+        before allowing them to delete the facility.
         """
-        user = self.request.user
-        if hasattr(user, 'owner_profile'):  # Ensure the user is an Owner
-            instance.delete()
+        apartment = instance.apartment  # Get the apartment associated with the facility
+        
+        # Check if the user is the owner of the apartment
+        if apartment.location.owner.user != self.request.user:
+            raise PermissionDenied("You must be the owner of this apartment to delete a facility.")
+        
+        # Proceed to delete the facility
+        instance.delete()
+        
+class ApartmentBookingsListView(ListAPIView):
+    """
+    List bookings for a specific apartment, excluding guest details.
+    """
+    serializer_class = PublicBookingSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        apartment_id = self.kwargs['apartment_id']
+        return Booking.objects.filter(apartment__id=apartment_id)
 
