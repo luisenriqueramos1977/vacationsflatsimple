@@ -1,14 +1,20 @@
 # File: api/serializers.py
 from rest_framework import serializers
-from .models import Location, Apartment, Owner, Guest, Review, Booking
+from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = '__all__'
 
+class PictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Picture
+        fields = ['image', 'format', 'size']
+
 class ApartmentSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
+    pictures = PictureSerializer(many=True, read_only=True)
 
     class Meta:
         model = Apartment
@@ -27,6 +33,8 @@ class GuestSerializer(serializers.ModelSerializer):
         fields = ['user']
 
 class ReviewSerializer(serializers.ModelSerializer):
+    guest = serializers.StringRelatedField(read_only=True)  # Guest's username or related representation
+
     class Meta:
         model = Review
         fields = '__all__'
@@ -34,4 +42,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
+        fields = '__all__'
+
+class FacilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
         fields = '__all__'
