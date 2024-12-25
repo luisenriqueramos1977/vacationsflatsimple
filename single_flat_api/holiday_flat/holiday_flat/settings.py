@@ -74,11 +74,23 @@ WSGI_APPLICATION = 'holiday_flat.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+'''
+#added on 22.12.2024
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'flat_api_db',  # Replace with your database name
+        'USER': 'luis',  # Replace with your PostgreSQL user
+        'PASSWORD': '12610418',   # Replace with your PostgreSQL password
+        'HOST': 'localhost',           # Use 'localhost' for local development or your server IP/hostname
+        'PORT': '5432',                # Default PostgreSQL port
     }
 }
 
@@ -123,3 +135,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#added on 24.12
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

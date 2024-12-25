@@ -3,9 +3,9 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import viewsets, mixins
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture
+from rest_framework import viewsets, mixins,  generics
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture, Currency
 from .serializers import (
     LocationSerializer,
     ApartmentSerializer,
@@ -15,10 +15,18 @@ from .serializers import (
     BookingSerializer,
     FacilitySerializer,
     PictureSerializer,
-    PublicBookingSerializer
+    PublicBookingSerializer,
+    CurrencySerializer
 )
 from rest_framework.exceptions import PermissionDenied  # Add this import
 from rest_framework.generics import ListAPIView
+#added in 20.12.2024
+from django.contrib.auth.models import Group
+from django.utils.dateparse import parse_date
+from django.db.models import Q
+#added on 22.12.2022
+from django.http import JsonResponse
+from django.shortcuts import render
 
 def home(request):
     return render(request, 'home.html')
@@ -29,29 +37,79 @@ def api_page(request):
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 class ApartmentViewSet(viewsets.ModelViewSet):
     queryset = Apartment.objects.all()
     serializer_class = ApartmentSerializer
-
+    '''
     def get_permissions(self):
         if self.action == 'list':
             return [AllowAny()]
         return [IsAuthenticated()]
+    '''
 
 class OwnerViewSet(viewsets.ModelViewSet):
     queryset = Owner.objects.all()
     serializer_class = OwnerSerializer
     permission_classes = [IsAuthenticated]
 
+#begings added on 20.12.2024
+class OwnerListCreateView(generics.ListCreateAPIView):
+    queryset = Owner.objects.all()
+    serializer_class = OwnerSerializer
+
+    def perform_create(self, serializer):
+        owner = serializer.save()
+        # Assign the user to the Owners group
+        owners_group, created = Group.objects.get_or_create(name="Owners")
+        owner.user.groups.add(owners_group)
+
+class OwnerGroupListView(APIView):
+    def get(self, request):
+        try:
+            owners_group = Group.objects.get(name="Owners")
+            owners = owners_group.user_set.all()
+            data = [{"id": user.id, "username": user.username} for user in owners]
+            return Response(data)
+        except Group.DoesNotExist:
+            return JsonResponse(
+                {'error': f"The group Owners does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+###ends added 20.12.2024
 class GuestViewSet(viewsets.ModelViewSet):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
     permission_classes = [IsAuthenticated]
 
-# File: api/views.py
+#begins added on 20.12.2024
+class GuestListCreateView(generics.ListCreateAPIView):
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
 
+    def perform_create(self, serializer):
+        guest = serializer.save()
+        # Assign the user to the Guests group
+        guests_group, created = Group.objects.get_or_create(name="Guests")
+        guest.user.groups.add(guests_group)
+
+class GuestGroupListView(APIView):
+    def get(self, request):
+        try:
+            guests_group = Group.objects.get(name="Guests")
+            guests = guests_group.user_set.all()
+            data = [{"id": user.id, "username": user.username} for user in guests]
+            return Response(data)
+        except Group.DoesNotExist:
+            return JsonResponse(
+                {'error': f"The group Guests does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+#ends added 20.12.2024
+# File: api/views.py
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -109,81 +167,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 class FacilityViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()
     serializer_class = FacilitySerializer
-
-    def get_permissions(self):
-        """
-        Override the get_permissions method to apply custom permissions.
-        Only owners can create, update, or delete facilities.
-        """
-        if self.action in ['create', 'update', 'destroy']:
-            # Ensure the user is authenticated
-            permission_classes = [IsAuthenticated]
-            if not self.request.user.is_authenticated:
-                raise PermissionDenied("Authentication required")
-            return permission_classes
-        # Allow anyone to list or retrieve facilities
-        return [IsAuthenticated()]
-
-    def perform_create(self, serializer):
-        """
-        Override to ensure that the authenticated user is the owner of the apartment
-        before allowing them to create a facility.
-        """
-        apartment_id = self.request.data.get('apartment')  # Get apartment from the request data
-        if not apartment_id:
-            raise PermissionDenied("Apartment is required to attach facility.")
-        
-        try:
-            apartment = Apartment.objects.get(id=apartment_id)
-        except Apartment.DoesNotExist:
-            raise PermissionDenied("Apartment does not exist.")
-        
-        # Check if the user is the owner of the apartment
-        if apartment.location.owner.user != self.request.user:
-            raise PermissionDenied("You must be the owner of this apartment to add a facility.")
-        
-        # Proceed to save the facility
-        serializer.save()
-
-    def perform_update(self, serializer):
-        """
-        Override to ensure that the authenticated user is the owner of the apartment
-        before allowing them to update the facility.
-        """
-        apartment_id = self.request.data.get('apartment')  # Get apartment from the request data
-        if not apartment_id:
-            raise PermissionDenied("Apartment is required to update facility.")
-        
-        try:
-            apartment = Apartment.objects.get(id=apartment_id)
-        except Apartment.DoesNotExist:
-            raise PermissionDenied("Apartment does not exist.")
-        
-        # Check if the user is the owner of the apartment
-        if apartment.location.owner.user != self.request.user:
-            raise PermissionDenied("You must be the owner of this apartment to update a facility.")
-        
-        # Proceed to save the facility
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        """
-        Override to ensure that the authenticated user is the owner of the apartment
-        before allowing them to delete the facility.
-        """
-        apartment = instance.apartment  # Get the apartment associated with the facility
-        
-        # Check if the user is the owner of the apartment
-        if apartment.location.owner.user != self.request.user:
-            raise PermissionDenied("You must be the owner of this apartment to delete a facility.")
-        
-        # Proceed to delete the facility
-        instance.delete()
+    #permission_classes = [IsAuthenticated]  # Use a list here
+    #an user is required
+    #def perform_create(self, serializer):
+    #    serializer.save(owner=self.request.user.owner_profile)
         
 class ApartmentBookingsListView(ListAPIView):
     """
@@ -195,4 +187,106 @@ class ApartmentBookingsListView(ListAPIView):
     def get_queryset(self):
         apartment_id = self.kwargs['apartment_id']
         return Booking.objects.filter(apartment__id=apartment_id)
+    
+#added on 21.12.2024
+
+class ApartmentBookingsView(APIView):
+    def get(self, request, apartment_id):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if not start_date or not end_date:
+            return Response(
+                {"error": "Please provide both 'start_date' and 'end_date' in YYYY-MM-DD format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            start_date = parse_date(start_date)
+            end_date = parse_date(end_date)
+
+            if not start_date or not end_date:
+                raise ValueError("Invalid date format")
+
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Please use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Filter bookings for the specified apartment within the given period
+        bookings = Booking.objects.filter(
+            apartment_id=apartment_id,
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+
+        serializer = BookingSerializer(bookings, many=True)
+
+        return Response(serializer.data)
+#added on 21.12.2024
+    
+class CurrencyViewSet(viewsets.ModelViewSet):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    #permission_classes = [IsAuthenticated]  #grant user is authenticated to do crud
+    #grant user is owner to create currencies
+    #def perform_create(self, serializer):
+    #    serializer.save(owner=self.request.user.owner_profile)    
+
+#added on 25.12.2024
+class PictureViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing pictures.
+    """
+    queryset = Picture.objects.all()
+    serializer_class = PictureSerializer
+    #permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
+
+
+
+#filter apartment per booking date, add on 20.12.2024
+class AvailableApartmentsView(APIView):
+    def get(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if not start_date or not end_date:
+            return Response(
+                {"error": "Please provide both 'start_date' and 'end_date' in YYYY-MM-DD format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            start_date = parse_date(start_date)
+            end_date = parse_date(end_date)
+
+            if not start_date or not end_date:
+                raise ValueError("Invalid date format")
+
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Please use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get all apartments that do not have bookings overlapping the given period
+        overlapping_bookings = Booking.objects.filter(
+            Q(start_date__lte=end_date) & Q(end_date__gte=start_date)
+        )
+
+        booked_apartment_ids = overlapping_bookings.values_list('apartment_id', flat=True)
+
+        available_apartments = Apartment.objects.exclude(id__in=booked_apartment_ids)
+
+        serializer = ApartmentSerializer(available_apartments, many=True)
+
+        return Response(serializer.data)
+
+#added on 22.12.2024
+def custom_404_view(request, exception):
+    return render(request, '404.html', {'error': str(exception)}, status=404)
+
+
+
 
