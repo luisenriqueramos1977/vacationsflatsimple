@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,6 +86,7 @@ DATABASES = {
 }
 '''
 #added on 22.12.2024
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -96,6 +97,21 @@ DATABASES = {
         'PORT': '5432',                # Default PostgreSQL port
     }
 }
+'''
+#updated on 26.12.2024
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django_db'),
+        'USER': os.getenv('POSTGRES_USER', 'django_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'django_password'),
+        'HOST': 'db',  # Docker service name for the database
+        'PORT': '5432',
+    }
+}
+
+# Use a secret key from environment variables
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback_secret_key')
 
 
 # Password validation

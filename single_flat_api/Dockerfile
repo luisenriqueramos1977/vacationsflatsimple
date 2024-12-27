@@ -1,19 +1,16 @@
-# Use the official Python image
-FROM python:3.9-slim
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Use Python image
+FROM python:3.10-slim
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /holiday_flat
 
 # Install dependencies
-COPY requirements.txt .
+COPY requirements.txt /holiday_flat/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files into the container
-COPY . .
+# Copy the application code
+COPY ./holiday_flat /holiday_flat
 
-# Set up the entrypoint to run Django commands
-ENTRYPOINT ["./entrypoint.sh"]
+# Expose the application port
+EXPOSE 8000
+
