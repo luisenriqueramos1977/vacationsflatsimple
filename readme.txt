@@ -9,7 +9,9 @@ To run the back end of this application do as following:
 
 flat_env\Scripts\activate #activa el env
 cd holiday_flat
-python manage.py runserver
+python manage.py runserver # to run with django server
+
+
 
 endpoints: 
 /api/locations/ locations where apartments are located

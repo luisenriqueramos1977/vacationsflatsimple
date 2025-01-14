@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+# Set working directory in the container
+WORKDIR /app
+
+# Copy the project folder into the container
+COPY ./holiday_flat /app/holiday_flat
+
+# Copy requirements.txt and install dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+#in dev
+# Copy the application code
+COPY ./holiday_flat /holiday_flat
+
+# Expose the application port
+EXPOSE 8000
+
+#in prod
+# Collect static files in proudction
+#RUN python manage.py collectstatic --noinput
+
+# Run Gunicorn in production
+#CMD ["gunicorn", "holiday_flat.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

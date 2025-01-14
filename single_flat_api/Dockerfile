@@ -14,3 +14,4 @@ COPY ./holiday_flat /holiday_flat
 # Expose the application port
 EXPOSE 8000
 
+
