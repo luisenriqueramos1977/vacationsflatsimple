@@ -7,10 +7,20 @@ Guests can create booking and add reviews to apartments.
 
 To run the back end of this application do as following:
 
+cd single_flat_api
+
 flat_env\Scripts\activate #activa el env
 cd holiday_flat
 python manage.py runserver # to run with django server
 
+to run this app with docker:
+
+docker-compose build
+docker-compose up
+
+in case of db corrupted:
+docker-compose run web python manage.py migrate
+docker-compose run web python manage.py makemigrations
 
 
 endpoints: 
