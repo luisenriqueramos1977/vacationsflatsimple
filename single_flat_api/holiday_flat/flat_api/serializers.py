@@ -13,6 +13,64 @@ class LocationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ApartmentSerializer(serializers.ModelSerializer):
+    pictures = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Apartment
+        fields = [
+            'id',
+            'apartment_name',
+            'price',
+            'currency',
+            'location',
+            'rooms',
+            'size',
+            'facilities',
+            'pictures',
+            'owner'
+        ]
+
+    def get_pictures(self, obj):
+        """
+        Retrieve pictures linked to this apartment based on the `apartment` ForeignKey.
+        """
+        pictures = Picture.objects.filter(apartment=obj)
+        return [
+            {
+                "id": picture.id,
+                "image": picture.image.url,
+                "format": picture.format,
+                "size_in_bytes": picture.size_in_bytes,
+            }
+            for picture in pictures
+        ]
+
+    def create(self, validated_data):
+        facilities = validated_data.pop('facilities', [])
+        apartment = Apartment.objects.create(**validated_data)
+        apartment.facilities.set(facilities)
+
+        # Automatically assign pictures where `apartment` matches the new apartment instance
+        Picture.objects.filter(apartment=apartment).update(apartment=apartment)
+
+        return apartment
+
+    def update(self, instance, validated_data):
+        facilities = validated_data.pop('facilities', [])
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        instance.facilities.set(facilities)
+
+        # Ensure pictures are properly linked
+        Picture.objects.filter(apartment=instance).update(apartment=instance)
+
+        return instance
+
+'''
+class ApartmentSerializer(serializers.ModelSerializer):
     facilities = serializers.PrimaryKeyRelatedField(
         queryset=Facility.objects.all(),
         many=True
@@ -66,7 +124,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
         instance.facilities.set(facilities)
         instance.pictures.set(pictures)
         return instance
-
+'''
 # serializers.py 
 
 
@@ -135,12 +193,17 @@ class CurrencySerializer(serializers.ModelSerializer):
         model = Currency
         fields = '__all__'
 
+
+
 class PictureSerializer(serializers.ModelSerializer):
     apartment = serializers.IntegerField(write_only=True)  # Accepts apartment ID during write operations
-    
+    apartment_detail = serializers.PrimaryKeyRelatedField(
+        read_only=True, source='apartment'
+    )  # Shows the apartment details in read operations
+
     class Meta:
         model = Picture
-        fields = ['id', 'image', 'format', 'size_in_bytes', 'apartment']
+        fields = ['id', 'image', 'format', 'size_in_bytes', 'apartment', 'apartment_detail']
 
     def validate_apartment(self, value):
         """
