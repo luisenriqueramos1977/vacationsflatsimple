@@ -400,6 +400,36 @@ class AvailableApartmentsView(APIView):
         serializer = ApartmentSerializer(available_apartments, many=True)
 
         return Response(serializer.data)
+    
+
+class ApartmentFilterView(APIView):
+    def get(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        min_price = request.query_params.get('min_price')
+        max_price = request.query_params.get('max_price')
+        facilities = request.query_params.getlist('facilities')
+
+        apartments = Apartment.objects.all()
+
+        if start_date and end_date:
+            # Assuming the Apartment model has a booking or availability field
+            apartments = apartments.filter(
+                Q(bookings__start_date__gte=start_date, bookings__end_date__lte=end_date) |
+                Q(bookings__isnull=True)
+            )
+
+        if min_price:
+            apartments = apartments.filter(price__gte=min_price)
+        if max_price:
+            apartments = apartments.filter(price__lte=max_price)
+
+        if facilities:
+            apartments = apartments.filter(facilities__in=facilities).distinct()
+
+        serializer = ApartmentSerializer(apartments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 #added on 22.12.2024
 def custom_404_view(request, exception):

@@ -100,6 +100,8 @@ urlpatterns = [
     path('apartments/<int:apartment_id>/bookings/', 
          ApartmentBookingsListView.as_view(), 
          name='apartment-bookings'),
+    path('apartments/filter/', views.ApartmentFilterView.as_view(), name='filter-apartments'),
+
     # New endpoint for available apartments
     # New endpoint for filtering bookings by apartment in a given period
     path(
