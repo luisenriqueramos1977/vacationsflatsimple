@@ -86,7 +86,7 @@ DATABASES = {
 }
 '''
 #added on 22.12.2024
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -109,7 +109,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+'''
 # Use a secret key from environment variables
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback_secret_key')
 
@@ -167,3 +167,30 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://yoursite.com'
 ]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'flat_api': {  # Replace 'your_app' with the name of your app
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

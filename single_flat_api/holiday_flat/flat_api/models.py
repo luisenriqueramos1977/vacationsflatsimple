@@ -22,6 +22,7 @@ class Location(models.Model):
     def __str__(self):
         return self.name
     
+
 class Apartment(models.Model):
     apartment_name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -31,22 +32,47 @@ class Apartment(models.Model):
     size = models.FloatField()
     facilities = models.ManyToManyField('Facility', related_name='apartments')
     pictures = models.ManyToManyField('Picture', related_name='apartment_pictures', blank=True)
+    owner = models.ForeignKey('Owner', on_delete=models.CASCADE, related_name='apartments', null=True, blank=True)
 
     def __str__(self):
         return self.apartment_name
-    
+
+    def clean(self):
+        """
+        Ensure the apartment has an owner before saving.
+        """
+        if not self.owner:
+            raise ValidationError("An owner must be assigned to this apartment.")
+
+    def save(self, *args, **kwargs):
+        """
+        Perform the clean method before saving to enforce the rule.
+        """
+        self.clean()
+        super().save(*args, **kwargs)
+
     @property
     def price_with_currency(self):
         """Returns the price along with its currency unit."""
         return f"{self.price} {self.currency.code if self.currency else ''}"
 
+
 class Picture(models.Model):
     image = models.ImageField(upload_to='apartment_pictures/')
     size_in_bytes = models.PositiveIntegerField()
     format = models.CharField(max_length=50, help_text="Format of the image, e.g., JPEG, PNG")
+    apartment = models.ForeignKey(
+        'Apartment', 
+        on_delete=models.CASCADE, 
+        related_name='apartment_pictures',  # Changed related_name to avoid conflict
+        null=True, 
+        blank=True,
+        help_text="The apartment this picture belongs to."
+    )
 
     def __str__(self):
         return f"{self.format} - {self.size_in_bytes} bytes"
+
 
 
 
@@ -55,6 +81,8 @@ class Owner(models.Model):
 
     def __str__(self):
         return self.user.username  # Display the owner's username
+    
+    
 
 class Guest(models.Model):
     firstname = models.CharField(max_length=50)

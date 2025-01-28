@@ -1,29 +1,16 @@
 # File: api/serializers.py
 from rest_framework import serializers
 from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture
+from django.contrib.auth.models import Group, User
+import logging
+from django.core.exceptions import ObjectDoesNotExist
+
+logger = logging.getLogger(__name__)
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = '__all__'
-
-class PictureSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Picture
-        fields = ['image', 'format', 'size_in_bytes']
-
-'''
-class ApartmentSerializer(serializers.ModelSerializer):
-    location = serializers.PrimaryKeyRelatedField(
-        queryset=Location.objects.all(),  # Ensures the location must exist in the database
-    )
-    pictures = PictureSerializer(many=True, read_only=True)
-    price_with_currency = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Apartment
-        fields = '__all__'
-'''
 
 class ApartmentSerializer(serializers.ModelSerializer):
     facilities = serializers.PrimaryKeyRelatedField(
@@ -33,6 +20,10 @@ class ApartmentSerializer(serializers.ModelSerializer):
     pictures = serializers.PrimaryKeyRelatedField(
         queryset=Picture.objects.all(),
         many=True
+    )
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(groups__name="Owners"),  # Only include users in "Owners" group
+        required=True
     )
 
     class Meta:
@@ -46,13 +37,16 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'rooms',
             'size',
             'facilities',
-            'pictures'
+            'pictures',
+            'owner'  # Include owner in fields
         ]
 
     def create(self, validated_data):
         facilities = validated_data.pop('facilities', [])
         pictures = validated_data.pop('pictures', [])
-        apartment = Apartment.objects.create(**validated_data)
+        owner1 = validated_data.pop('owner')  # Extract owner from validated data
+        owner = Owner.objects.create(user=owner1)
+        apartment = Apartment.objects.create(owner=owner, **validated_data)
 
         # Assign Many-to-Many relationships
         apartment.facilities.set(facilities)
@@ -72,13 +66,40 @@ class ApartmentSerializer(serializers.ModelSerializer):
         instance.facilities.set(facilities)
         instance.pictures.set(pictures)
         return instance
-    
+
+# serializers.py 
+
+
 class OwnerSerializer(serializers.ModelSerializer):
-    apartments = ApartmentSerializer(many=True, read_only=True)
+    username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
         model = Owner
-        fields = ['user', 'apartments']
+        fields = ['id', 'username', 'email', 'password']
+
+    def create(self, validated_data):
+        # Check if the "Owners" group exists
+        try:
+            owners_group = Group.objects.get(name="Owners")
+        except Group.DoesNotExist:
+            raise serializers.ValidationError({"group_error": "The 'Owners' group does not exist."})
+
+        # Create the user
+        username = validated_data['username']
+        email = validated_data['email']
+        password = validated_data['password']
+        user = User.objects.create_user(username=username, email=email, password=password)
+
+        # Add the user to the "Owners" group
+        user.groups.add(owners_group)
+
+        # Create the owner profile
+        owner = Owner.objects.create(user=user)
+
+        return owner
+
 
 class GuestSerializer(serializers.ModelSerializer):
     class Meta:
@@ -115,7 +136,24 @@ class CurrencySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PictureSerializer(serializers.ModelSerializer):
+    apartment = serializers.IntegerField(write_only=True)  # Accepts apartment ID during write operations
+    
     class Meta:
         model = Picture
-        fields = ['id','image', 'format', 'size_in_bytes']
+        fields = ['id', 'image', 'format', 'size_in_bytes', 'apartment']
 
+    def validate_apartment(self, value):
+        """
+        Validate that the provided apartment ID corresponds to an existing apartment.
+        """
+        if not Apartment.objects.filter(pk=value).exists():
+            raise serializers.ValidationError(f"Apartment with ID {value} does not exist.")
+        return value
+
+    def create(self, validated_data):
+        """
+        Override the create method to properly assign the apartment instance.
+        """
+        apartment_id = validated_data.pop('apartment')  # Extract apartment ID
+        validated_data['apartment'] = Apartment.objects.get(pk=apartment_id)  # Get Apartment instance
+        return super().create(validated_data)

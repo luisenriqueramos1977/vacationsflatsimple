@@ -21,6 +21,7 @@ docker-compose up
 in case of db corrupted:
 docker-compose run web python manage.py migrate
 docker-compose run web python manage.py makemigrations
+docker-compose up --force-recreate
 
 
 endpoints: 
@@ -33,6 +34,12 @@ endpoints:
 /api/bookings/ let guests make bookings
  /api/facilities/ Facilities provided by apartemtns
 /api/currencies/ currency of prices
+
+1. create some locations
+2. create some currencies
+3. create superuser:
+docker-compose run web python manage.py createsuperuser
+4. create Owners and Guests group from http://localhost:8000/admin/
 
 To run the front-end 
 

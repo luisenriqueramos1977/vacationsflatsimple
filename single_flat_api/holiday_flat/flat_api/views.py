@@ -27,6 +27,11 @@ from django.db.models import Q
 #added on 22.12.2022
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from rest_framework.exceptions import NotFound
+
+
+
 
 def home(request):
     return render(request, 'home.html')
@@ -49,10 +54,130 @@ class ApartmentViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
     '''
 
+#added on 25.12.2024
+class PictureViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing pictures.
+    """
+    queryset = Picture.objects.all()
+    serializer_class = PictureSerializer
+    #permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
+
+
 class OwnerViewSet(viewsets.ModelViewSet):
     queryset = Owner.objects.all()
     serializer_class = OwnerSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
+
+class OwnerGroupViewSet(viewsets.ViewSet):
+    """
+    ViewSet for managing Owners group members.
+    """
+
+    #permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        """
+        List all users in the Owners group.
+        """
+        try:
+            owners_group = Group.objects.get(name="Owners")
+            owners = owners_group.user_set.all()
+            data = [{"id": user.id, "username": user.username} for user in owners]
+            return Response(data)
+        except Group.DoesNotExist:
+            raise NotFound(detail="The Owners group does not exist.")
+
+    def create(self, request):
+        """
+        Create a new user and add them to the Owners group.
+        """
+        try:
+            # Ensure the Owners group exists
+            owners_group = Group.objects.get(name="Owners")
+        except Group.DoesNotExist:
+            return Response(
+                {"error": "The Owners group does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate required fields in the POST message
+        required_fields = ["username", "password", "email"]
+        for field in required_fields:
+            if field not in request.data:
+                return Response(
+                    {"error": f"{field} is required."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Extract fields from the request data
+        username = request.data["username"]
+        password = request.data["password"]
+        email = request.data["email"]
+
+        # Create the user
+        user = User(username=username, email=email)
+        user.set_password(password)  # Securely set the password
+        user.save()
+
+        # Add the user to the Owners group
+        owners_group.user_set.add(user)
+
+        # Return a success response
+        return Response(
+            {
+                "message": f"User {username} created and added to Owners group.",
+                "user": {"id": user.id, "username": user.username, "email": user.email},
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+    def retrieve(self, request, pk=None):
+        """
+        Retrieve a specific user in the Owners group.
+        """
+        try:
+            user = User.objects.get(pk=pk)
+            if not user.groups.filter(name="Owners").exists():
+                return Response(
+                    {"error": "This user is not part of the Owners group."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return Response({"id": user.id, "username": user.username})
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def update(self, request, pk=None):
+        """
+        Update a specific user in the Owners group.
+        """
+        try:
+            user = User.objects.get(pk=pk)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "User updated successfully."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        """
+        Remove a specific user from the Owners group.
+        """
+        try:
+            user = User.objects.get(pk=pk)
+            if not user.groups.filter(name="Owners").exists():
+                return Response(
+                    {"error": "This user is not part of the Owners group."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            user.delete()
+            return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
 
 #begings added on 20.12.2024
 class OwnerListCreateView(generics.ListCreateAPIView):
@@ -82,7 +207,7 @@ class OwnerGroupListView(APIView):
 class GuestViewSet(viewsets.ModelViewSet):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 #begins added on 20.12.2024
 class GuestListCreateView(generics.ListCreateAPIView):
@@ -234,14 +359,7 @@ class CurrencyViewSet(viewsets.ModelViewSet):
     #def perform_create(self, serializer):
     #    serializer.save(owner=self.request.user.owner_profile)    
 
-#added on 25.12.2024
-class PictureViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing pictures.
-    """
-    queryset = Picture.objects.all()
-    serializer_class = PictureSerializer
-    #permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
+
 
 
 

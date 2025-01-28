@@ -7,12 +7,14 @@ from .views import (
     LocationViewSet,
     ApartmentViewSet,
     OwnerViewSet,
+    OwnerGroupViewSet,
     GuestViewSet,
     ReviewViewSet,
     BookingViewSet,
     FacilityViewSet,
     ApartmentBookingsListView,
     CurrencyViewSet,
+    PictureViewSet,
 )
 #added on 22.12.2024
 from django.conf.urls import handler404
@@ -40,14 +42,9 @@ apartment_detail = ApartmentViewSet.as_view({
     'delete': 'destroy'
 })
 
-owner_list = OwnerViewSet.as_view({
-    'get': 'list',
-    'post': 'create'
-})
-owner_detail = OwnerViewSet.as_view({
-    'get': 'retrieve',
-    'put': 'update',
-    'delete': 'destroy'
+owner_list = OwnerGroupViewSet.as_view({
+    'get': 'list',        # List all owners
+    'post': 'create',     # Create a new owner
 })
 
 guest_list = GuestViewSet.as_view({
@@ -80,12 +77,12 @@ booking_detail = BookingViewSet.as_view({
     'delete': 'destroy'
 })
 
-pictures_list = BookingViewSet.as_view({
+pictures_list = PictureViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
 
-pictures_detail = BookingViewSet.as_view({
+pictures_detail = PictureViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
@@ -98,6 +95,7 @@ urlpatterns = [
     path('locations/', location_list, name='location-list'),
     path('locations/<int:pk>/', location_detail, name='location-detail'),
     path('apartments/', apartment_list, name='apartment-list'),
+    path('pictures/', pictures_list, name='picture-list'),  # List and create pictures
     path('apartments/<int:pk>/', apartment_detail, name='apartment-detail'),
     path('apartments/<int:apartment_id>/bookings/', 
          ApartmentBookingsListView.as_view(), 
@@ -110,9 +108,7 @@ urlpatterns = [
         name='apartment-bookings'
     ),
     path('apartments/available/', views.AvailableApartmentsView.as_view(), name='available-apartments'),
-    path('owners/', owner_list, name='owner-list'),
-    path('owners/<int:pk>/', owner_detail, name='owner-detail'),
-    path('groups/owners/', views.OwnerGroupListView.as_view(), name='owners-group-list'),##added on 20.12.2024
+    path('groups/owners/', owner_list, name='owners-list-create'),##added on 20.12.2024
     path('guests/', guest_list, name='guest-list'),
     path('guests/<int:pk>/', guest_detail, name='guest-detail'),
     path('groups/guests/', views.GuestGroupListView.as_view(), name='guests-group-list'),#added on 20.12.2024
@@ -129,7 +125,6 @@ urlpatterns = [
     path('facilities/<int:pk>/', views.FacilityViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='facility-detail'),
     # currencies
     path('currencies/', views.CurrencyViewSet.as_view({'get': 'list', 'post': 'create'}), name='currency-list'),  # List and create currencies
-    path('pictures/', views.PictureViewSet.as_view({'get': 'list', 'post': 'create'}), name='picture-list'),  # List and create pictures
     path('pictures/<int:pk>/', views.PictureViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='pictures-detail'),
 ]
 

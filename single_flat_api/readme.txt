@@ -17,6 +17,7 @@ python manage.py runserver#start the app
 2. python manage.py makemigrations
 3. create superuser:
 python manage.py createsuperuser
+e.g: root
 4. create Owners and Guests group
 
 
