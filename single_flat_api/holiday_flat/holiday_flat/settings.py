@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'holiday_flat.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -97,7 +97,7 @@ DATABASES = {
         'PORT': '5432',                # Default PostgreSQL port
     }
 }
-'''
+
 #updated on 26.12.2024
 DATABASES = {
     'default': {

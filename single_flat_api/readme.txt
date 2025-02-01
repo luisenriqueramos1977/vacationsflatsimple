@@ -40,3 +40,8 @@ DROP SCHEMA public CASCADE;
 GRANT ALL ON DATABASE flat_api_db TO luis;
 ALTER DATABASE flat_api_db OWNER TO luis;
 GRANT USAGE, CREATE ON SCHEMA public TO luis;
+
+
+ideas: 
+1. only customer can book, or the owner of the apartment
+2. weight of facilities will be gotten by everytime people search, and click in one facility, divided by the total of search. 

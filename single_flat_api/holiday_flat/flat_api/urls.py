@@ -7,8 +7,9 @@ from .views import (
     LocationViewSet,
     ApartmentViewSet,
     OwnerViewSet,
-    OwnerGroupViewSet,
+    GuestsGroupViewSet,
     GuestViewSet,
+    GuestGroupListView,
     ReviewViewSet,
     BookingViewSet,
     FacilityViewSet,
@@ -42,7 +43,7 @@ apartment_detail = ApartmentViewSet.as_view({
     'delete': 'destroy'
 })
 
-owner_list = OwnerGroupViewSet.as_view({
+owner_list = OwnerViewSet.as_view({
     'get': 'list',        # List all owners
     'post': 'create',     # Create a new owner
 })
@@ -51,6 +52,7 @@ guest_list = GuestViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
+
 guest_detail = GuestViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
@@ -97,29 +99,16 @@ urlpatterns = [
     path('apartments/', apartment_list, name='apartment-list'),
     path('pictures/', pictures_list, name='picture-list'),  # List and create pictures
     path('apartments/<int:pk>/', apartment_detail, name='apartment-detail'),
-    path('apartments/<int:apartment_id>/bookings/', 
-         ApartmentBookingsListView.as_view(), 
-         name='apartment-bookings'),
+    path('apartments/<int:apartment_id>/bookings/', ApartmentBookingsListView.as_view(), name='apartment-bookings'),
     path('apartments/filter/', views.ApartmentFilterView.as_view(), name='filter-apartments'),
-
     # New endpoint for available apartments
     # New endpoint for filtering bookings by apartment in a given period
-    path(
-        'apartments/<int:apartment_id>/bookings/',
-        views.ApartmentBookingsView.as_view(),
-        name='apartment-bookings'
-    ),
+    path('apartments/<int:apartment_id>/bookings/', views.ApartmentBookingsView.as_view(), name='apartment-bookings'),
     path('apartments/available/', views.AvailableApartmentsView.as_view(), name='available-apartments'),
     path('groups/owners/', owner_list, name='owners-list-create'),##added on 20.12.2024
-    path('guests/', guest_list, name='guest-list'),
-    path('guests/<int:pk>/', guest_detail, name='guest-detail'),
-    path('groups/guests/', views.GuestGroupListView.as_view(), name='guests-group-list'),#added on 20.12.2024
+    path('groups/guests/', guest_list, name='guests-group-list'),#added on 20.12.2024
     path('reviews/', ReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name='review-list'),
-    path('reviews/<int:pk>/', ReviewViewSet.as_view({
-        'get': 'retrieve',
-        'put': 'update',
-        'delete': 'destroy'
-    }), name='review-detail'),
+    path('reviews/<int:pk>/', ReviewViewSet.as_view({'get': 'retrieve','put': 'update','delete': 'destroy'}), name='review-detail'),
     path('bookings/', booking_list, name='booking-list'),
     path('bookings/<int:pk>/', booking_detail, name='booking-detail'),
     # Facilities endpoints

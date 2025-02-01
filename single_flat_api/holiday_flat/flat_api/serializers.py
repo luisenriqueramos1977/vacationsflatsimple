@@ -1,6 +1,6 @@
 # File: api/serializers.py
 from rest_framework import serializers
-from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture
+from .models import Location, Apartment, Review, Booking, Facility, Picture
 from django.contrib.auth.models import Group, User
 import logging
 from django.core.exceptions import ObjectDoesNotExist
@@ -14,26 +14,19 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class ApartmentSerializer(serializers.ModelSerializer):
     pictures = serializers.SerializerMethodField()
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(groups__name="Owners"),  # ✅ Ensures only Owners can be selected
+        write_only=True
+    )
 
     class Meta:
         model = Apartment
         fields = [
-            'id',
-            'apartment_name',
-            'price',
-            'currency',
-            'location',
-            'rooms',
-            'size',
-            'facilities',
-            'pictures',
-            'owner'
+            'id', 'apartment_name', 'price', 'currency', 'location', 'rooms', 'size', 'facilities', 'pictures', 'owner'
         ]
 
     def get_pictures(self, obj):
-        """
-        Retrieve pictures linked to this apartment based on the `apartment` ForeignKey.
-        """
+        """Retrieve pictures linked to this apartment."""
         pictures = Picture.objects.filter(apartment=obj)
         return [
             {
@@ -41,11 +34,30 @@ class ApartmentSerializer(serializers.ModelSerializer):
                 "image": picture.image.url,
                 "format": picture.format,
                 "size_in_bytes": picture.size_in_bytes,
+                "tags": picture.tags,
             }
             for picture in pictures
         ]
 
+    def validate_apartment_name(self, value):
+        """Ensure that apartment_name is unique."""
+        if Apartment.objects.filter(apartment_name=value).exists():
+            raise serializers.ValidationError("An apartment with this name already exists.")
+        return value
+
+    def validate_owner(self, value):
+        """Ensure the owner is a valid user in the 'Owners' group."""
+        print(f"Validating owner: {value.username} (ID: {value.id})")  # Debug log
+        if not value.groups.filter(name="Owners").exists():
+            raise serializers.ValidationError("Only users in the 'Owners' group can own apartments.")
+        return value  # Return the validated user object
+
     def create(self, validated_data):
+        """Create an apartment after validating owner and unique name."""
+        owner = validated_data.pop('owner')
+        validated_data['owner'] = self.validate_owner(owner)  # Validate owner
+        validated_data['apartment_name'] = self.validate_apartment_name(validated_data['apartment_name'])  # Validate name
+
         facilities = validated_data.pop('facilities', [])
         apartment = Apartment.objects.create(**validated_data)
         apartment.facilities.set(facilities)
@@ -56,7 +68,14 @@ class ApartmentSerializer(serializers.ModelSerializer):
         return apartment
 
     def update(self, instance, validated_data):
+        """Update an apartment while ensuring name uniqueness and valid owner."""
+        if 'apartment_name' in validated_data:
+            validated_data['apartment_name'] = self.validate_apartment_name(validated_data['apartment_name'])
+
         facilities = validated_data.pop('facilities', [])
+
+        if 'owner' in validated_data:
+            validated_data['owner'] = self.validate_owner(validated_data.pop('owner'))  # ✅ Validate new owner
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -69,112 +88,109 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
         return instance
 
-'''
-class ApartmentSerializer(serializers.ModelSerializer):
-    facilities = serializers.PrimaryKeyRelatedField(
-        queryset=Facility.objects.all(),
-        many=True
-    )
-    pictures = serializers.PrimaryKeyRelatedField(
-        queryset=Picture.objects.all(),
-        many=True
-    )
-    owner = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(groups__name="Owners"),  # Only include users in "Owners" group
-        required=True
-    )
-
-    class Meta:
-        model = Apartment
-        fields = [
-            'id',
-            'apartment_name',
-            'price',
-            'currency',
-            'location',
-            'rooms',
-            'size',
-            'facilities',
-            'pictures',
-            'owner'  # Include owner in fields
-        ]
-
-    def create(self, validated_data):
-        facilities = validated_data.pop('facilities', [])
-        pictures = validated_data.pop('pictures', [])
-        owner1 = validated_data.pop('owner')  # Extract owner from validated data
-        owner = Owner.objects.create(user=owner1)
-        apartment = Apartment.objects.create(owner=owner, **validated_data)
-
-        # Assign Many-to-Many relationships
-        apartment.facilities.set(facilities)
-        apartment.pictures.set(pictures)
-        return apartment
-
-    def update(self, instance, validated_data):
-        facilities = validated_data.pop('facilities', [])
-        pictures = validated_data.pop('pictures', [])
-        
-        # Update instance fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        # Update Many-to-Many relationships
-        instance.facilities.set(facilities)
-        instance.pictures.set(pictures)
-        return instance
-'''
-# serializers.py 
 
 
 class OwnerSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-    email = serializers.EmailField(write_only=True)
+    username = serializers.CharField()#add write_only=True to production
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
-        model = Owner
+        model = User  # Use Django's User model directly
         fields = ['id', 'username', 'email', 'password']
 
     def create(self, validated_data):
-        # Check if the "Owners" group exists
-        try:
-            owners_group = Group.objects.get(name="Owners")
-        except Group.DoesNotExist:
-            raise serializers.ValidationError({"group_error": "The 'Owners' group does not exist."})
+        """Ensure the user is created and added to the 'Owners' group."""
+        # Check if the 'Owners' group exists
+        owners_group, created = Group.objects.get_or_create(name="Owners")
 
         # Create the user
-        username = validated_data['username']
-        email = validated_data['email']
-        password = validated_data['password']
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
 
-        # Add the user to the "Owners" group
+        # Add the user to the 'Owners' group
         user.groups.add(owners_group)
 
-        # Create the owner profile
-        owner = Owner.objects.create(user=user)
-
-        return owner
-
+        return user  # Return the created User object
 
 class GuestSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+
     class Meta:
-        model = Guest
-        fields = ['user']
+        model = User  # Use Django's default User model
+        fields = ['id', 'username', 'email', 'password']
+
+    def create(self, validated_data):
+        """Ensure the user is created and added to the 'Guests' group."""
+        # Ensure the "Guests" group exists
+        guests_group, created = Group.objects.get_or_create(name="Guests")
+
+        # Create the user
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+
+        # Add the user to the 'Guests' group
+        user.groups.add(guests_group)
+
+        return user  # Return the created User object
 
 class ReviewSerializer(serializers.ModelSerializer):
-    guest = serializers.StringRelatedField(read_only=True)  # Guest's username or related representation
+    guest = serializers.StringRelatedField(read_only=True)  # Display guest username
 
     class Meta:
         model = Review
         fields = '__all__'
 
+    def create(self, validated_data):
+        """Ensure the user belongs to the 'Guests' group before creating a review."""
+        user = self.context['request'].user  # Get the logged-in user
+
+        # Check if the user is in the 'Guests' group
+        if not user.groups.filter(name="Guests").exists():
+            raise serializers.ValidationError({"error": "Only guests can add reviews."})
+
+        # Create the review with the authenticated user as the guest
+        validated_data['guest'] = user
+        return Review.objects.create(**validated_data)
+
+
+
 class BookingSerializer(serializers.ModelSerializer):
+    guest = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(groups__name="Guests"),  # ✅ Only users in Guests group
+        write_only=True
+    )
+    guest_detail = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Booking
-        fields = '__all__'
+        fields = ['id', 'guest', 'guest_detail', 'apartment', 'start_date', 'end_date']
+
+    def get_guest_detail(self, obj):
+        """Return guest username instead of Guest ID"""
+        return obj.guest.username if obj.guest else None
+
+    def create(self, validated_data):
+        """Ensure the guest belongs to the 'Guests' group before creating a booking."""
+        user = validated_data.pop("guest")  # Get the User instance
+
+        # Check if the user is in the "Guests" group
+        if not user.groups.filter(name="Guests").exists():
+            raise serializers.ValidationError({"error": "Only users in the 'Guests' group can make a booking."})
+
+        # Assign the user as the guest
+        validated_data["guest"] = user
+
+        return super().create(validated_data)
+
 
 class PublicBookingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -203,7 +219,7 @@ class PictureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Picture
-        fields = ['id', 'image', 'format', 'size_in_bytes', 'apartment', 'apartment_detail']
+        fields = ['id', 'image', 'format', 'size_in_bytes', 'apartment', 'apartment_detail','tags']
 
     def validate_apartment(self, value):
         """

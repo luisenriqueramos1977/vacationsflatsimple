@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets, mixins,  generics
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
-from .models import Location, Apartment, Owner, Guest, Review, Booking, Facility, Picture, Currency
+from .models import Location, Apartment, Review, Booking, Facility, Picture, Currency
 from .serializers import (
     LocationSerializer,
     ApartmentSerializer,
@@ -21,7 +21,7 @@ from .serializers import (
 from rest_framework.exceptions import PermissionDenied  # Add this import
 from rest_framework.generics import ListAPIView
 #added in 20.12.2024
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.utils.dateparse import parse_date
 from django.db.models import Q
 #added on 22.12.2022
@@ -65,39 +65,40 @@ class PictureViewSet(viewsets.ModelViewSet):
 
 
 class OwnerViewSet(viewsets.ModelViewSet):
-    queryset = Owner.objects.all()
     serializer_class = OwnerSerializer
+    queryset = User.objects.filter(groups__name='Owners')
     #permission_classes = [IsAuthenticated]
 
-class OwnerGroupViewSet(viewsets.ViewSet):
+
+class GuestsGroupViewSet(viewsets.ViewSet):
     """
-    ViewSet for managing Owners group members.
+    ViewSet for managing GUests group members.
     """
 
     #permission_classes = [IsAuthenticated]
 
     def list(self, request):
         """
-        List all users in the Owners group.
+        List all users in the Guests group.
         """
         try:
-            owners_group = Group.objects.get(name="Owners")
-            owners = owners_group.user_set.all()
-            data = [{"id": user.id, "username": user.username} for user in owners]
+            guests_group = Group.objects.get(name="Guests")
+            guests = guests_group.user_set.all()
+            data = [{"id": user.id, "username": user.username} for user in guests]
             return Response(data)
         except Group.DoesNotExist:
-            raise NotFound(detail="The Owners group does not exist.")
+            raise NotFound(detail="The Guests group does not exist.")
 
     def create(self, request):
         """
-        Create a new user and add them to the Owners group.
+        Create a new user and add them to the Guests group.
         """
         try:
-            # Ensure the Owners group exists
-            owners_group = Group.objects.get(name="Owners")
+            # Ensure the Guests group exists
+            guests_group = Group.objects.get(name="Guests")
         except Group.DoesNotExist:
             return Response(
-                {"error": "The Owners group does not exist."},
+                {"error": "The Guests group does not exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -121,12 +122,12 @@ class OwnerGroupViewSet(viewsets.ViewSet):
         user.save()
 
         # Add the user to the Owners group
-        owners_group.user_set.add(user)
+        guests_group.user_set.add(user)
 
         # Return a success response
         return Response(
             {
-                "message": f"User {username} created and added to Owners group.",
+                "message": f"User {username} created and added to Guests group.",
                 "user": {"id": user.id, "username": user.username, "email": user.email},
             },
             status=status.HTTP_201_CREATED,
@@ -135,13 +136,13 @@ class OwnerGroupViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         """
-        Retrieve a specific user in the Owners group.
+        Retrieve a specific user in the Guests group.
         """
         try:
             user = User.objects.get(pk=pk)
-            if not user.groups.filter(name="Owners").exists():
+            if not user.groups.filter(name="Guests").exists():
                 return Response(
-                    {"error": "This user is not part of the Owners group."},
+                    {"error": "This user is not part of the Guests group."},
                     status=status.HTTP_404_NOT_FOUND,
                 )
             return Response({"id": user.id, "username": user.username})
@@ -150,38 +151,39 @@ class OwnerGroupViewSet(viewsets.ViewSet):
 
     def update(self, request, pk=None):
         """
-        Update a specific user in the Owners group.
+        Update a specific user in the Guests group.
         """
         try:
             user = User.objects.get(pk=pk)
             serializer = UserSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "User updated successfully."})
+                return Response({"message": "Guest updated successfully."})
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, pk=None):
         """
-        Remove a specific user from the Owners group.
+        Remove a specific user from the Guests group.
         """
         try:
             user = User.objects.get(pk=pk)
-            if not user.groups.filter(name="Owners").exists():
+            if not user.groups.filter(name="Guests").exists():
                 return Response(
-                    {"error": "This user is not part of the Owners group."},
+                    {"error": "This user is not part of the Guests group."},
                     status=status.HTTP_404_NOT_FOUND,
                 )
             user.delete()
             return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
         
 
 #begings added on 20.12.2024
 class OwnerListCreateView(generics.ListCreateAPIView):
-    queryset = Owner.objects.all()
+    queryset = User.objects.all()
     serializer_class = OwnerSerializer
 
     def perform_create(self, serializer):
@@ -205,13 +207,13 @@ class OwnerGroupListView(APIView):
     
 ###ends added 20.12.2024
 class GuestViewSet(viewsets.ModelViewSet):
-    queryset = Guest.objects.all()
     serializer_class = GuestSerializer
+    queryset = User.objects.filter(groups__name='Guests')
     #permission_classes = [IsAuthenticated]
 
 #begins added on 20.12.2024
 class GuestListCreateView(generics.ListCreateAPIView):
-    queryset = Guest.objects.all()
+    queryset = User.objects.all()
     serializer_class = GuestSerializer
 
     def perform_create(self, serializer):
@@ -409,6 +411,7 @@ class ApartmentFilterView(APIView):
         min_price = request.query_params.get('min_price')
         max_price = request.query_params.get('max_price')
         facilities = request.query_params.getlist('facilities')
+        location = request.query_params.getlist('location')
 
         apartments = Apartment.objects.all()
 
@@ -426,6 +429,8 @@ class ApartmentFilterView(APIView):
 
         if facilities:
             apartments = apartments.filter(facilities__in=facilities).distinct()
+        if location:
+            apartments = apartments.filter(location__in=location).distinct()
 
         serializer = ApartmentSerializer(apartments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
