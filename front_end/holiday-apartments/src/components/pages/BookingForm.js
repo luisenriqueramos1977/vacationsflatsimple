@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from '../api/api';
+import axios from '../../api/api';
 
 function BookingForm() {
   const { id } = useParams();

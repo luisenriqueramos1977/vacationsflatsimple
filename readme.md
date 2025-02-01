@@ -41,7 +41,12 @@ endpoints:
 docker-compose run web python manage.py createsuperuser
 4. create Owners and Guests group from http://localhost:8000/admin/
 
-To run the front-end 
+To run the front-end with node.js
+
+vacationsflatsimple\front_end\holiday-apartments> npm start
+
+
+
 
 
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]

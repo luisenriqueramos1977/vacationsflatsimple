@@ -105,24 +105,26 @@ class Booking(models.Model):
     apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name='bookings')
     start_date = models.DateField()
     end_date = models.DateField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field
 
     def clean(self):
         """
         Validate:
         1. End date must be after start date.
-        2. The user must belong to the "guests" group.
+        2. The user must belong to the "Guests" group.
         """
         if self.end_date <= self.start_date:
             raise ValidationError("End date must be after start date.")
 
         if not self.guest.groups.filter(name="Guests").exists():
-            raise ValidationError("Only users in the 'guests' group can make bookings.")
+            raise ValidationError("Only users in the 'Guests' group can make bookings.")
 
     def save(self, *args, **kwargs):
         """
-        Perform validation before saving.
+        Calculate total price before saving.
         """
-        self.clean()
+        self.clean()  # Validate before saving
+        self.total_price = self.booking_price  # Store the calculated price
         super().save(*args, **kwargs)
 
     @property
@@ -132,8 +134,7 @@ class Booking(models.Model):
         return num_days * self.apartment.price if self.apartment and self.apartment.price else 0
 
     def __str__(self):
-        return f"Booking by {self.guest.username} for {self.apartment.apartment_name} from {self.start_date} to {self.end_date}"
-    
+        return f"Booking by {self.guest.username} for {self.apartment.apartment_name} from {self.start_date} to {self.end_date}"    
 
 class Facility(models.Model):
     name = models.CharField(max_length=255)

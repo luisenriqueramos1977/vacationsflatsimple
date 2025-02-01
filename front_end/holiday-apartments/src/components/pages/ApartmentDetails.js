@@ -1,6 +1,7 @@
+import NavBar from "./NavBar";
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from '../api/api';
+import axios from '../../api/api';
 
 function ApartmentDetails() {
   const { id } = useParams();
