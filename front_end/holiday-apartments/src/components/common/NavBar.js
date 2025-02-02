@@ -1,15 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const NavBar = () => {
+  const location = useLocation();
+  
+  // Define menu options
+  const menuOptions = [
+    { path: "/", label: "Home" },
+    { path: "/locations", label: "Locations" },
+    { path: "/apartments", label: "Apartments" },
+    { path: "/booking", label: "Booking" },
+    { path: "/login", label: "Login" }
+  ];
+
   return (
     <nav className="fixed top-0 left-0 w-full bg-blue-500 text-white p-4 flex justify-around">
-      <Link to="/" className="px-4">Home</Link>
-      <Link to="/locations" className="px-4">Locations</Link>
-      <Link to="/apartments" className="px-4">Apartments</Link>
-      <Link to="/booking" className="px-4">Booking</Link>
-      <Link to="/login" className="px-4">Login</Link>
+      {menuOptions
+        .filter(option => option.path !== location.pathname) // Hide current page
+        .map(option => (
+          <Link key={option.path} to={option.path} className="px-4">
+            {option.label}
+          </Link>
+        ))}
     </nav>
   );
 };
 
 export default NavBar;
+
