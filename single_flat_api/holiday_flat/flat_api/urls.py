@@ -7,15 +7,13 @@ from .views import (
     LocationViewSet,
     ApartmentViewSet,
     OwnerViewSet,
-    GuestsGroupViewSet,
     GuestViewSet,
-    GuestGroupListView,
     ReviewViewSet,
     BookingViewSet,
-    FacilityViewSet,
     ApartmentBookingsListView,
-    CurrencyViewSet,
     PictureViewSet,
+    user_login,
+    user_logout,
 )
 #added on 22.12.2024
 from django.conf.urls import handler404
@@ -117,6 +115,8 @@ urlpatterns = [
     # currencies
     path('currencies/', views.CurrencyViewSet.as_view({'get': 'list', 'post': 'create'}), name='currency-list'),  # List and create currencies
     path('pictures/<int:pk>/', views.PictureViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='pictures-detail'),
+    path('auth/login/', user_login, name='user-login'),
+    path('auth/logout/', user_logout, name='user-logout'),
 ]
 
 #added on 22.12.2024

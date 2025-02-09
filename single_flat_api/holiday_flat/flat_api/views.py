@@ -1,4 +1,7 @@
 # File: api/views.py
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -440,6 +443,46 @@ class ApartmentFilterView(APIView):
 def custom_404_view(request, exception):
     return render(request, '404.html', {'error': str(exception)}, status=404)
 
+
+#added on 08.02.2025
+@api_view(['POST'])
+def user_login(request):
+    """
+    Authenticate a user and return a token if valid credentials are provided.
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if not username or not password:
+        return Response({"error": "Both username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        # Generate or retrieve a token for the user
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            "message": "Login successful!",
+            "token": token.key,
+            "user_id": user.id,
+            "username": user.username
+        }, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid credentials. Please try again."}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_logout(request):
+    """
+    Log out a user by deleting their authentication token.
+    """
+    try:
+        # Delete the user's token
+        request.user.auth_token.delete()
+        return Response({"message": "Logout successful!"}, status=status.HTTP_200_OK)
+    except AttributeError:
+        return Response({"error": "User is not logged in."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
