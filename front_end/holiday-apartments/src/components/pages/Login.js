@@ -6,49 +6,64 @@ import Footer from "../common/Footer";
 const Login = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Logging in with:", { user, password });
-    // Add authentication logic here
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("groups", JSON.stringify(data.groups || [])); // Store user groups
+
+        // Check if user belongs to the "Owners" group
+        if (data.groups && data.groups.includes("Owners")) {
+          navigate("/owner/dashboard"); // Redirect to OwnerDashboard
+        } else {
+          navigate("/guest/dashboard"); // Redirect to GuestDashboard
+        }
+      } else {
+        setError(data.error || "Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError("Something went wrong. Please try again later.");
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <NavBar />
-
-      {/* Centered Form */}
-      <div className="flex-grow flex items-center justify-center">
-        <div className="w-[300px] p-6 border rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Email/Username Field */}
-            <input
-              type="text"
-              placeholder="Email or Username"
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              className="border p-2 rounded"
-              required
-            />
-
-            {/* Password Field */}
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border p-2 rounded"
-              required
-            />
-
-            {/* Submit Button */}
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded font-bold">
-              Submit
-            </button>
-          </form>
+      <div className="flex items-center justify-center w-full min-h-screen">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96 text-center">
+          <h2 className="text-2xl mb-4">Login</h2>
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          <input
+            type="text"
+            placeholder="Username"
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            className="w-full p-2 border rounded mb-4"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded mb-4"
+          />
+          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
 
           {/* Registration Link */}
           <p className="text-center mt-4">
@@ -57,9 +72,8 @@ const Login = () => {
               Register here
             </button>
           </p>
-        </div>
+        </form>
       </div>
-
       <Footer />
     </div>
   );
@@ -67,5 +81,3 @@ const Login = () => {
 
 export default Login;
 
-
-  

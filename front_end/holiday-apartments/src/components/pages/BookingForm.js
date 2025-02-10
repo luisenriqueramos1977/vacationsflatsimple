@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../../api/api';
+import Footer from "../common/Footer";
+
 
 function BookingForm() {
   const { id } = useParams();
@@ -37,6 +39,9 @@ function BookingForm() {
         <button type="submit">Book</button>
       </form>
       {message && <p>{message}</p>}
+
+      <Footer />
+
     </div>
   );
 }

@@ -1,8 +1,12 @@
-import GuestMenu from "../common/GuestMenu";
+import GuestMenu from "../guests/GuestMenu";
+import NavBar from "../common/NavBar";
+import Footer from "../common/Footer";
+
 
 const GuestDashboard = () => {
   return (
     <div className="flex min-h-screen">
+      
       {/* Sidebar Menu */}
       <GuestMenu />
 
@@ -23,6 +27,7 @@ const GuestDashboard = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

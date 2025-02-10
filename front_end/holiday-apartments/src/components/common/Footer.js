@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-gray-800 text-white py-4 mt-auto">
+    <footer className="fixed bottom-0 left-0 w-full bg-gray-900 text-white p-4 text-center">
       <div className="flex justify-center gap-6 text-sm">
         <Link to="/contact-us" className="hover:underline">
           Contact Us

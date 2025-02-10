@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -7,22 +7,39 @@ import { Navigation } from "swiper/modules";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
-const apartmentImages = [
-  "/images/apartment1.jpg",
-  "/images/apartment2.jpg",
-  "/images/apartment3.jpg",
-  "/images/apartment4.jpg",
-  "/images/apartment5.jpg",
-];
-
 const HomePage = () => {
   const [location, setLocation] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [apartmentImages, setApartmentImages] = useState([]); // State for images
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
+
+  // Fetch images from the API
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/pictures/");
+        if (!response.ok) {
+          throw new Error("Failed to fetch images");
+        }
+
+        const data = await response.json();
+
+        // Extract image URLs from API response
+        const images = data.map((item) => item.image);
+        setApartmentImages(images);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        setError("Failed to load images. Please try again later.");
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams({
@@ -68,22 +85,32 @@ const HomePage = () => {
         </button>
       </div>
 
-      {/* Apartment Carousel (Now Below the Search Button) */}
+      {/* Apartment Carousel */}
       <div className="w-full max-w-4xl mx-auto mt-10">
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={20}
-          slidesPerView={3}
-          navigation
-          loop={true}
-          className="rounded-lg shadow-lg"
-        >
-          {apartmentImages.map((src, index) => (
-            <SwiperSlide key={index}>
-              <img src={src} alt={`Apartment ${index + 1}`} className="w-full h-64 object-cover rounded-lg" />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        {error ? (
+          <p className="text-red-500 text-center">{error}</p>
+        ) : (
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={20}
+            slidesPerView={3}
+            navigation
+            loop={true}
+            className="rounded-lg shadow-lg"
+          >
+            {apartmentImages.length > 0 ? (
+              apartmentImages.map((src, index) => (
+                <SwiperSlide key={index}>
+                  <img src={src} alt={`Apartment ${index + 1}`} className="w-full h-64 object-cover rounded-lg" />
+                </SwiperSlide>
+              ))
+            ) : (
+              <SwiperSlide>
+                <p className="text-center text-gray-500">No images available</p>
+              </SwiperSlide>
+            )}
+          </Swiper>
+        )}
       </div>
 
       <Footer />
@@ -92,3 +119,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+

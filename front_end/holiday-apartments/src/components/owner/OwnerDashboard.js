@@ -1,4 +1,4 @@
-import OwnerMenu from "../common/OwnerMenu";
+import OwnerMenu from "../owner/OwnerMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 

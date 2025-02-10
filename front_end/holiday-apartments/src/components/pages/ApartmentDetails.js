@@ -1,4 +1,6 @@
 import NavBar from "./NavBar";
+import Footer from "../common/Footer";
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from '../../api/api';
@@ -27,6 +29,9 @@ function ApartmentDetails() {
         ))}
       </div>
       <Link to={`/booking/${apartment.id}`}>Book Now</Link>
+
+      <Footer />
+
     </div>
   );
 }

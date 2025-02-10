@@ -444,7 +444,9 @@ def custom_404_view(request, exception):
     return render(request, '404.html', {'error': str(exception)}, status=404)
 
 
-#added on 08.02.2025
+#updated  on 10.02.2025
+from django.contrib.auth.models import Group
+
 @api_view(['POST'])
 def user_login(request):
     """
@@ -461,11 +463,16 @@ def user_login(request):
     if user is not None:
         # Generate or retrieve a token for the user
         token, created = Token.objects.get_or_create(user=user)
+
+        # Get the user's groups
+        user_groups = user.groups.values_list('name', flat=True)  # Returns a list of group names
+
         return Response({
             "message": "Login successful!",
             "token": token.key,
             "user_id": user.id,
-            "username": user.username
+            "username": user.username,
+            "groups": list(user_groups)  # Convert QuerySet to list for JSON response
         }, status=status.HTTP_200_OK)
 
     return Response({"error": "Invalid credentials. Please try again."}, status=status.HTTP_401_UNAUTHORIZED)

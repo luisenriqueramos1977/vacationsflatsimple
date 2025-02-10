@@ -11,7 +11,7 @@ const OwnerMenu = () => {
   ];
 
   return (
-    <div className="w-64 h-screen bg-gray-800 text-white fixed left-0 top-0 p-5">
+    <div className="fixed top-16 left-0 h-[calc(100vh-4rem)] w-48 bg-gray-800 text-white flex flex-col p-4 gap-4 overflow-y-auto">
       <h2 className="text-xl font-bold mb-4">Owner Dashboard</h2>
       <nav className="flex flex-col space-y-2">
         {menuItems.map((item) => (
