@@ -35,6 +35,7 @@ apartment_list = ApartmentViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
+
 apartment_detail = ApartmentViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
@@ -45,6 +46,13 @@ owner_list = OwnerViewSet.as_view({
     'get': 'list',        # List all owners
     'post': 'create',     # Create a new owner
 })
+
+owner_detail = OwnerViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'delete': 'destroy'
+})
+
 
 guest_list = GuestViewSet.as_view({
     'get': 'list',
@@ -104,7 +112,9 @@ urlpatterns = [
     path('apartments/<int:apartment_id>/bookings/', views.ApartmentBookingsView.as_view(), name='apartment-bookings'),
     path('apartments/available/', views.AvailableApartmentsView.as_view(), name='available-apartments'),
     path('groups/owners/', owner_list, name='owners-list-create'),##added on 20.12.2024
+    path('groups/owners/<int:pk>/', owner_detail, name='owner-detail'),
     path('groups/guests/', guest_list, name='guests-group-list'),#added on 20.12.2024
+    path('groups/guests/<int:pk>/', guest_detail, name='guests-detail'),
     path('reviews/', ReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name='review-list'),
     path('reviews/<int:pk>/', ReviewViewSet.as_view({'get': 'retrieve','put': 'update','delete': 'destroy'}), name='review-detail'),
     path('bookings/', booking_list, name='booking-list'),

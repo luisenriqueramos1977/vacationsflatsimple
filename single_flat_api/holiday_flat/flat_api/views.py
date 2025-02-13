@@ -64,13 +64,23 @@ class PictureViewSet(viewsets.ModelViewSet):
     """
     queryset = Picture.objects.all()
     serializer_class = PictureSerializer
-    #permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
 
+
+from django.contrib.auth.models import User
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from .serializers import OwnerSerializer
 
 class OwnerViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows only Owners to be viewed by ID.
+    """
     serializer_class = OwnerSerializer
-    queryset = User.objects.filter(groups__name='Owners')
-    #permission_classes = [IsAuthenticated]
+    queryset = User.objects.filter(groups__name='Owners')  # ✅ Filters only Owners
+    permission_classes = [IsAuthenticated]  # ✅ Optional: Can remove for testing
+
+
 
 
 class GuestsGroupViewSet(viewsets.ViewSet):
@@ -78,7 +88,7 @@ class GuestsGroupViewSet(viewsets.ViewSet):
     ViewSet for managing GUests group members.
     """
 
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         """
@@ -212,7 +222,7 @@ class OwnerGroupListView(APIView):
 class GuestViewSet(viewsets.ModelViewSet):
     serializer_class = GuestSerializer
     queryset = User.objects.filter(groups__name='Guests')
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 #begins added on 20.12.2024
 class GuestListCreateView(generics.ListCreateAPIView):

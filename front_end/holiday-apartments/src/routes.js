@@ -7,6 +7,8 @@ import Login from "./components/pages/Login";
 import NavBar from "./components/common/NavBar";
 import Register from "./components/pages/Register"
 import OwnerDashboard from "./components/owner/OwnerDashboard";
+import OwnerProfile from "./components/owner/OwnerProfile"; // ✅ Correct import
+
 import GuestDashboard from "./components/guests/GuestDashboard";
 import ContactUs from "./components/pages/ContactUs";
 
@@ -22,6 +24,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />  {/* Ensure this exists */}
         <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+        <Route path="/owner/profile" element={<OwnerProfile />} />
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
         <Route path="/contact-us" element={<ContactUs />} />
       </Routes>

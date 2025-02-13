@@ -90,31 +90,31 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
 
 
+from django.contrib.auth.models import User, Group
+from rest_framework import serializers
+
 class OwnerSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()#add write_only=True to production
+    username = serializers.CharField()  # Keep this for readability
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, required=False)  # ✅ Password is optional in GET requests
 
     class Meta:
-        model = User  # Use Django's User model directly
+        model = User
         fields = ['id', 'username', 'email', 'password']
 
     def create(self, validated_data):
         """Ensure the user is created and added to the 'Owners' group."""
-        # Check if the 'Owners' group exists
         owners_group, created = Group.objects.get_or_create(name="Owners")
 
-        # Create the user
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password']
         )
 
-        # Add the user to the 'Owners' group
         user.groups.add(owners_group)
-
         return user  # Return the created User object
+
 
 class GuestSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
