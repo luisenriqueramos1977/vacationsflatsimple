@@ -6,7 +6,7 @@ import Footer from "../common/Footer";
 const GuestDashboard = () => {
   return (
     <div className="flex min-h-screen">
-      
+      <NavBar />
       {/* Sidebar Menu */}
       <GuestMenu />
 
