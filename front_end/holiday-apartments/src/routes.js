@@ -11,6 +11,7 @@ import OwnerProfile from "./components/owner/OwnerProfile"; // ✅ Correct impor
 import GuestDashboard from "./components/guests/GuestDashboard";
 import GuestProfile from "./components/guests/GuestProfile"; // ✅ Correct import
 import ContactUs from "./components/pages/ContactUs";
+import ApartmentDetails from './components/pages/ApartmentDetails';
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/locations" element={<Locations />} />
         <Route path="/apartments" element={<Apartments />} />
+        <Route path="/apartments/:id" element={<ApartmentDetails />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />  {/* Ensure this exists */}

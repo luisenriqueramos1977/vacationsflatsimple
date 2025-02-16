@@ -1,39 +1,48 @@
-import NavBar from "./NavBar";
+import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from '../../api/api';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-function ApartmentDetails() {
-  const { id } = useParams();
+const ApartmentDetails = () => {
+  const { id } = useParams(); // Get the apartment ID from the URL
   const [apartment, setApartment] = useState(null);
 
+  // Fetch apartment details based on the ID
   useEffect(() => {
-    axios.get(`/api/apartments/${id}/`)
-      .then(response => setApartment(response.data))
-      .catch(error => console.error('Error fetching apartment details:', error));
+    fetch(`http://localhost:8000/api/apartments/${id}/`)
+      .then((response) => response.json())
+      .then((data) => setApartment(data))
+      .catch((error) => console.error('Error fetching apartment details:', error));
   }, [id]);
 
-  if (!apartment) return <p>Loading...</p>;
+  if (!apartment) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div>
-      <h1>{apartment.name}</h1>
-      <p>{apartment.description}</p>
-      <p>Price: {apartment.price}</p>
+    <div className="p-8">
+            <NavBar />
+      <h1 className="text-3xl font-bold mb-4">{apartment.apartment_name}</h1>
+      <p>Price: {apartment.price} {apartment.currency}</p>
+      <p>Location: {apartment.location}</p>
+      <p>Rooms: {apartment.rooms}</p>
+      <p>Size: {apartment.size} sqm</p>
       <div>
-        <h3>Pictures</h3>
-        {apartment.pictures.map(picture => (
-          <img key={picture.id} src={picture.url} alt={apartment.name} style={{ width: '200px' }} />
+        <h2 className="text-xl font-bold mt-4">Pictures:</h2>
+        {apartment.pictures.map((picture) => (
+          <img
+            key={picture.id}
+            src={`http://localhost:8000${picture.image}`}
+            alt={picture.tags.join(', ')}
+            className="mt-2"
+          />
         ))}
       </div>
-      <Link to={`/booking/${apartment.id}`}>Book Now</Link>
-
       <Footer />
 
     </div>
   );
-}
+};
 
 export default ApartmentDetails;

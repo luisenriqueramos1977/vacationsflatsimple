@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 
@@ -58,7 +59,15 @@ const Apartments = () => {
             <tbody>
               {apartments.map((apartment) => (
                 <tr key={apartment.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 border-b">{apartment.apartment_name}</td>
+                  <td className="py-3 px-4 border-b">
+                    {/* Wrap apartment name in a Link */}
+                    <Link
+                      to={`/apartments/${apartment.id}`} // Link to ApartmentDetails page
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      {apartment.apartment_name}
+                    </Link>
+                  </td>
                   <td className="py-3 px-4 border-b">
                     {apartment.price} {currencies[apartment.currency] || 'Loading...'}
                   </td>
