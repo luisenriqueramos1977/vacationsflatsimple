@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import OwnerMenu from "./OwnerMenu";
+import OwnerMenu from "./GuestMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
@@ -26,7 +26,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/api/groups/owners/${userId}/`, {
+        const response = await fetch(`http://localhost:8000/api/groups/guests/${userId}/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -78,7 +78,7 @@ const ProfilePage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/groups/owners/${userId}/`, {
+      const response = await fetch(`http://localhost:8000/api/groups/guests/${userId}/`, {
         method: "PUT", // or PATCH depending on your API
         headers: {
           "Content-Type": "application/json",

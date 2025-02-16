@@ -8,8 +8,8 @@ import NavBar from "./components/common/NavBar";
 import Register from "./components/pages/Register"
 import OwnerDashboard from "./components/owner/OwnerDashboard";
 import OwnerProfile from "./components/owner/OwnerProfile"; // ✅ Correct import
-
 import GuestDashboard from "./components/guests/GuestDashboard";
+import GuestProfile from "./components/guests/GuestProfile"; // ✅ Correct import
 import ContactUs from "./components/pages/ContactUs";
 
 const AppRoutes = () => {
@@ -26,6 +26,8 @@ const AppRoutes = () => {
         <Route path="/owner/dashboard" element={<OwnerDashboard />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
+        <Route path="/guest/profile" element={<GuestProfile />} />
+
         <Route path="/contact-us" element={<ContactUs />} />
       </Routes>
     </Router>

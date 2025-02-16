@@ -100,7 +100,7 @@ class OwnerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password','first_name','last_name','groups']
 
     def create(self, validated_data):
         """Ensure the user is created and added to the 'Owners' group."""
@@ -119,11 +119,11 @@ class OwnerSerializer(serializers.ModelSerializer):
 class GuestSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, required=False)
 
     class Meta:
         model = User  # Use Django's default User model
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password','first_name','last_name','groups']
 
     def create(self, validated_data):
         """Ensure the user is created and added to the 'Guests' group."""
