@@ -5,6 +5,7 @@ from . import views
 from django.urls import path
 from .views import (
     LocationViewSet,
+    CurrencyViewSet,
     ApartmentViewSet,
     OwnerViewSet,
     GuestViewSet,
@@ -26,6 +27,17 @@ location_list = LocationViewSet.as_view({
     'post': 'create'
 })
 location_detail = LocationViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'delete': 'destroy'
+})
+
+currencies_list = CurrencyViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+
+currency_details = CurrencyViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
@@ -123,7 +135,9 @@ urlpatterns = [
     path('facilities/', views.FacilityViewSet.as_view({'get': 'list', 'post': 'create'}), name='facility-list'),
     path('facilities/<int:pk>/', views.FacilityViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='facility-detail'),
     # currencies
-    path('currencies/', views.CurrencyViewSet.as_view({'get': 'list', 'post': 'create'}), name='currency-list'),  # List and create currencies
+    path('currencies/', currencies_list, name='currencies-list'),
+    path('currencies/<int:pk>/', currency_details, name='currency-details'),
+    #path('currencies/', views.CurrencyViewSet.as_view({'get': 'list', 'post': 'create'}), name='currency-list'),  # List and create currencies
     path('pictures/<int:pk>/', views.PictureViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='pictures-detail'),
     path('auth/login/', user_login, name='user-login'),
     path('auth/logout/', user_logout, name='user-logout'),

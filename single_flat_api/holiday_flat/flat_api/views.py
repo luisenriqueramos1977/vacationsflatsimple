@@ -80,9 +80,6 @@ class OwnerViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(groups__name='Owners')  # ✅ Filters only Owners
     permission_classes = [IsAuthenticated]  # ✅ Optional: Can remove for testing
 
-
-
-
 class GuestsGroupViewSet(viewsets.ViewSet):
     """
     ViewSet for managing GUests group members.
