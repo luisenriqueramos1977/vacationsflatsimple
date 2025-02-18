@@ -43,9 +43,19 @@ def home(request):
 def api_page(request):
     return render(request, 'api.html')
 
+from rest_framework.decorators import action
+
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    # Override get_queryset to filter by name if provided
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        name = self.request.query_params.get("name", None)
+        if name:
+            queryset = queryset.filter(name__iexact=name)  # Case-insensitive match
+        return queryset
+
     #permission_classes = [IsAuthenticated]
 
 class ApartmentViewSet(viewsets.ModelViewSet):
@@ -68,10 +78,7 @@ class PictureViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated users
 
 
-from django.contrib.auth.models import User
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from .serializers import OwnerSerializer
 
 class OwnerViewSet(viewsets.ModelViewSet):
     """
