@@ -32,6 +32,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework.exceptions import NotFound
+from django.core.mail import send_mail
 
 
 
@@ -497,6 +498,29 @@ def user_logout(request):
         return Response({"message": "Logout successful!"}, status=status.HTTP_200_OK)
     except AttributeError:
         return Response({"error": "User is not logged in."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+@api_view(["POST"])
+def contact_view(request):
+    email = request.data.get("email")
+    message = request.data.get("message")
+
+    if not email or not message:
+        return Response({"error": "Email and message are required."}, status=400)
+
+    try:
+        send_mail(
+            subject="Customer Contact Message",
+            message=f"From: {email}\n\n{message}",
+            from_email="your-email@gmail.com",  # Change to your actual email
+            recipient_list=["your-email@gmail.com"],  # Your Gmail address
+            fail_silently=False,
+        )
+        return Response({"success": "Message sent successfully."})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
 
 
 

@@ -141,6 +141,7 @@ urlpatterns = [
     path('pictures/<int:pk>/', views.PictureViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='pictures-detail'),
     path('auth/login/', user_login, name='user-login'),
     path('auth/logout/', user_logout, name='user-logout'),
+    path('contact/', views.contact_view, name='contact-view'),
 ]
 
 #added on 22.12.2024

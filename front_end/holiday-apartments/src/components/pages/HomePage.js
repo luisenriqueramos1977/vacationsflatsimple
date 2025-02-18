@@ -41,7 +41,7 @@ const HomePage = () => {
     fetchImages();
   }, []);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const queryParams = new URLSearchParams({
       location,
       min_price: minPrice,
@@ -50,7 +50,26 @@ const HomePage = () => {
       end_date: endDate,
     }).toString();
 
-    navigate(`/api/apartments/filter?${queryParams}`);
+    try {
+      // Fetch filtered apartments
+      const response = await fetch(`http://localhost:8000/api/apartments/filter?${queryParams}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch filtered apartments");
+      }
+
+      const data = await response.json();
+
+      // Check if the result is not empty
+      if (data.length > 0) {
+        // Redirect to Booking.js and pass the results as state
+        navigate("/booking", { state: { filteredApartments: data } });
+      } else {
+        alert("No apartments found matching your criteria.");
+      }
+    } catch (error) {
+      console.error("Error fetching filtered apartments:", error);
+      setError("Failed to fetch apartments. Please try again later.");
+    }
   };
 
   return (
