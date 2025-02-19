@@ -42,32 +42,54 @@ const HomePage = () => {
   }, []);
 
   const handleSearch = async () => {
-    const queryParams = new URLSearchParams({
-      location,
-      min_price: minPrice,
-      max_price: maxPrice,
-      start_date: startDate,
-      end_date: endDate,
-    }).toString();
-
     try {
-      // Fetch filtered apartments
-      const response = await fetch(`http://localhost:8000/api/apartments/filter?${queryParams}`);
-      if (!response.ok) {
+      // Step 1: Get the location ID from the name
+      const locationResponse = await fetch(`http://localhost:8000/api/locations/?name=${location}`);
+      if (!locationResponse.ok) {
+        throw new Error("Failed to fetch location");
+      }
+
+      const locationData = await locationResponse.json();
+      
+      if (locationData.length === 0) {
+        alert("Location not found. Please enter a valid location.");
+        return;
+      }
+
+      const locationId = locationData[0].id; // Get the first matching location ID
+
+      // Step 2: Use the location ID to search for apartments
+      const queryParams = new URLSearchParams({
+        location: locationId, // Use location ID instead of name
+        min_price: minPrice,
+        max_price: maxPrice,
+        start_date: startDate,
+        end_date: endDate,
+      }).toString();
+
+      const apartmentResponse = await fetch(`http://localhost:8000/api/apartments/filter?${queryParams}`);
+      if (!apartmentResponse.ok) {
         throw new Error("Failed to fetch filtered apartments");
       }
 
-      const data = await response.json();
+      const apartmentData = await apartmentResponse.json();
 
-      // Check if the result is not empty
-      if (data.length > 0) {
-        // Redirect to Booking.js and pass the results as state
-        navigate("/booking", { state: { filteredApartments: data } });
+      // Step 3: Redirect to Booking.js with results
+      if (apartmentData.length > 0) {
+
+        navigate("/booking", {
+            state: {
+              filteredApartments: apartmentData,
+              startDate, // Pass startDate
+              endDate, // Pass endDate
+            },
+          });
+
       } else {
         alert("No apartments found matching your criteria.");
       }
     } catch (error) {
-      console.error("Error fetching filtered apartments:", error);
+      console.error("Error during search:", error);
       setError("Failed to fetch apartments. Please try again later.");
     }
   };
@@ -138,4 +160,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
