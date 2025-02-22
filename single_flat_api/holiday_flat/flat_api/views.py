@@ -33,6 +33,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework.exceptions import NotFound
 from django.core.mail import send_mail
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 
@@ -61,6 +62,8 @@ class LocationViewSet(viewsets.ModelViewSet):
 class ApartmentViewSet(viewsets.ModelViewSet):
     queryset = Apartment.objects.all()
     serializer_class = ApartmentSerializer
+    filter_backends = [DjangoFilterBackend]  # Enable filtering
+    filterset_fields = ['owner']  # Allow filtering by owner
     '''
     def get_permissions(self):
         if self.action == 'list':

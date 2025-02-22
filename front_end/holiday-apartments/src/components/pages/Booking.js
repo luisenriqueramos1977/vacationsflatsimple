@@ -55,7 +55,7 @@ const Booking = () => {
 
     // Calculate the difference in days, including both start and end dates
     const differenceInMs = end.getTime() - start.getTime();
-    const differenceInDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
+    const differenceInDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24)) + 1;
 
     return Math.max(1, differenceInDays); // Ensure at least 1 day
   };
@@ -65,34 +65,35 @@ const Booking = () => {
       <NavBar />
       <div className="flex flex-1 flex-col items-center justify-center mt-16">
         <h1 className="text-3xl font-bold mb-8">Booking</h1>
-
+  
         {/* Display filtered apartments */}
         {filteredApartments.length > 0 ? (
           <div className="w-full max-w-4xl mx-auto">
             <h2 className="text-2xl font-semibold mb-4">Available Apartments</h2>
-            <ul className="space-y-4">
-              {filteredApartments.map((apartment) => {
-                const dailyPrice = Number(apartment.price) || 0; // Convert price to number
-                const bookingDays = calculateBookingDays(startDate, endDate);
-                const totalBookingPrice = dailyPrice * bookingDays; // Correct calculation
-
-                return (
-                  <li key={apartment.id} className="bg-white p-6 rounded-lg shadow-md">
-                    <h3 className="text-xl font-bold">{apartment.name}</h3>
-                    <p className="text-gray-600">{apartment.description}</p>
-                    <p className="text-gray-600">
-                      <span className="font-semibold">Daily Price:</span> ${dailyPrice.toFixed(2)}
-                    </p>
-                    <p className="text-gray-600">
-                      <span className="font-semibold">Total Booking Price:</span> ${totalBookingPrice.toFixed(2)}
-                    </p>
-                    <p className="text-gray-600">
-                      <span className="font-semibold">Location:</span> {locations[apartment.location] || "Loading..."}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border border-gray-300 p-3 text-left">Location</th>
+                  <th className="border border-gray-300 p-3 text-left">Daily Price</th>
+                  <th className="border border-gray-300 p-3 text-left">Total Booking Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredApartments.map((apartment) => {
+                  const dailyPrice = Number(apartment.price) || 0;
+                  const bookingDays = calculateBookingDays(startDate, endDate);
+                  const totalBookingPrice = dailyPrice * bookingDays;
+  
+                  return (
+                    <tr key={apartment.id} className="bg-white">
+                      <td className="border border-gray-300 p-3">{locations[apartment.location] || "Loading..."}</td>
+                      <td className="border border-gray-300 p-3">${dailyPrice.toFixed(2)}</td>
+                      <td className="border border-gray-300 p-3">${totalBookingPrice.toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         ) : (
           <p className="text-gray-600">No apartments found matching your criteria.</p>
@@ -100,7 +101,7 @@ const Booking = () => {
       </div>
       <Footer />
     </div>
-  );
+  );  
 };
 
 export default Booking;

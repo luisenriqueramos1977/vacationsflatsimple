@@ -155,21 +155,7 @@ const ProfilePage = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Groups</label>
-            <input
-              type="text"
-              name="groups"
-              value={profile.groups.join(", ")} // Display groups as comma-separated values
-              onChange={(e) =>
-                setProfile((prevProfile) => ({
-                  ...prevProfile,
-                  groups: e.target.value.split(", "), // Convert input back to array
-                }))
-              }
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
-          </div>
+
 
           <button
             type="submit"

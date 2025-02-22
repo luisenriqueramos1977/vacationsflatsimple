@@ -5,12 +5,16 @@ const NavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userGroup, setUserGroup] = useState(""); // State to store user group
 
   useEffect(() => {
     console.log("Checking localStorage for token..."); // Debugging
     const token = localStorage.getItem("token"); // Ensure this matches what you actually store
+    const group = localStorage.getItem("groups"); // Get user group from localStorage
     console.log("Token found:", token); // Debugging
+    console.log("User group found:", group); // Debugging
     setIsLoggedIn(!!token); // Set state based on token existence
+    setUserGroup(group || ""); // Set user group state
     console.log("isLoggedIn set to:", !!token); // Debugging
   }, []);
 
@@ -30,6 +34,7 @@ const NavBar = () => {
         localStorage.removeItem("token"); // Clear token
         localStorage.removeItem("user_id"); // Clear token
         localStorage.removeItem("username"); // Clear token
+        localStorage.removeItem("group"); // Clear group
         setIsLoggedIn(false); // Update state
         navigate("/"); // Redirect to Home
       } else {
@@ -40,13 +45,16 @@ const NavBar = () => {
     }
   };
 
+  // Determine the dashboard path based on the user's group
+  const getDashboardPath = () => {
+    return userGroup.includes("Owners") ? "/owner/dashboard" : "/guest/dashboard";
+  };
+
   const menuOptions = [
     { path: "/", label: "Home" },
     { path: "/locations", label: "Locations" },
     { path: "/apartments", label: "Apartments" },
-    { path: "/booking", label: "Booking" },
     { path: "/login", label: "Login" },
-    { path: "/guest/dashboard", label: "Dashboard" }, // Add Dashboard option
   ];
 
   return (
@@ -57,8 +65,6 @@ const NavBar = () => {
           if (option.path === location.pathname) return false;
           // Hide Login if logged in
           if (option.path === "/login" && isLoggedIn) return false;
-          // Hide Dashboard if not logged in
-          if (option.path === "/guest/dashboard" && !isLoggedIn) return false;
           return true;
         })
         .map((option) => (
@@ -66,6 +72,15 @@ const NavBar = () => {
             {option.label}
           </Link>
         ))}
+
+      {/* Conditionally render Dashboard button */}
+      {isLoggedIn && !location.pathname.includes("/dashboard") && (
+        <Link to={getDashboardPath()} className="px-4">
+          Dashboard
+        </Link>
+      )}
+
+      {/* Logout button */}
       {isLoggedIn && (
         <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
           Logout
