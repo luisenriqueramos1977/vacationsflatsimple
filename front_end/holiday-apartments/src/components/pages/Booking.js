@@ -1,14 +1,25 @@
+
+import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
 const Booking = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const filteredApartments = location.state?.filteredApartments || [];
   const startDate = location.state?.startDate; // Access startDate
   const endDate = location.state?.endDate; // Access endDate
   const [locations, setLocations] = useState({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
+  // Check if user is logged in (token in localStorage)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   // Fetch location names based on IDs
   useEffect(() => {
@@ -60,22 +71,59 @@ const Booking = () => {
     return Math.max(1, differenceInDays); // Ensure at least 1 day
   };
 
+// Function to handle booking
+const handleBook = async (apartment) => {
+  const userId = localStorage.getItem("user_id");
+
+  if (!userId) {
+    alert("Please log in to book an apartment.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/api/bookings/?Content-Type=application/json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guest: parseInt(userId, 10),
+        apartment: apartment.id,
+        start_date: startDate,
+        end_date: endDate,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to book apartment");
+    }
+
+    alert("Booking successful!");
+    navigate("/guest/dashboard"); // Redirect to Customer Dashboard
+  } catch (error) {
+    console.error("Error booking apartment:", error);
+    alert("Failed to book apartment. Please try again.");
+  }
+};
+
+
   return (
     <div className="h-screen flex flex-col">
       <NavBar />
       <div className="flex flex-1 flex-col items-center justify-center mt-16">
         <h1 className="text-3xl font-bold mb-8">Booking</h1>
-  
+
         {/* Display filtered apartments */}
         {filteredApartments.length > 0 ? (
           <div className="w-full max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4">Available Apartments</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center">Available Apartments</h2>
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="border border-gray-300 p-3 text-left">Location</th>
-                  <th className="border border-gray-300 p-3 text-left">Daily Price</th>
-                  <th className="border border-gray-300 p-3 text-left">Total Booking Price</th>
+                <tr className="bg-gray-200 text-center">
+                  <th className="border border-gray-300 p-3 text-center">Location</th>
+                  <th className="border border-gray-300 p-3 text-center">Daily Price</th>
+                  <th className="border border-gray-300 p-3 text-center">Total Booking Price</th>
+                  <th className="border border-gray-300 p-3 text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,12 +131,23 @@ const Booking = () => {
                   const dailyPrice = Number(apartment.price) || 0;
                   const bookingDays = calculateBookingDays(startDate, endDate);
                   const totalBookingPrice = dailyPrice * bookingDays;
-  
+
                   return (
-                    <tr key={apartment.id} className="bg-white">
+                    <tr key={apartment.id} className="bg-white text-center">
                       <td className="border border-gray-300 p-3">{locations[apartment.location] || "Loading..."}</td>
                       <td className="border border-gray-300 p-3">${dailyPrice.toFixed(2)}</td>
                       <td className="border border-gray-300 p-3">${totalBookingPrice.toFixed(2)}</td>
+                      <td className="border border-gray-300 p-3">
+                        <button
+                          onClick={() => handleBook(apartment)}
+                          disabled={!isLoggedIn}
+                          className={`bg-red-500 text-white px-4 py-2 rounded-md ${
+                            isLoggedIn ? "hover:bg-red-600" : "opacity-50 cursor-not-allowed"
+                          }`}
+                        >
+                          Book
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -101,7 +160,7 @@ const Booking = () => {
       </div>
       <Footer />
     </div>
-  );  
+  ); 
 };
 
 export default Booking;
