@@ -5,26 +5,48 @@ import Footer from "../common/Footer";
 
 const OwnerDashboard = () => {
   const [totalApartments, setTotalApartments] = useState(0);
+  const [totalBookings, setTotalBookings] = useState(0);
 
   useEffect(() => {
-    const fetchTotalApartments = async () => {
+    const fetchData = async () => {
       try {
+        // Check if the user is an owner
+        const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+        if (!groups.includes("Owners")) {
+          console.error("User is not an owner.");
+          return;
+        }
+
+        // Fetch user ID from local storage
         const userId = localStorage.getItem("user_id");
         if (!userId) {
           console.error("User ID not found in local storage");
           return;
         }
 
-        const response = await fetch(`http://localhost:8000/api/apartments/?owner=${userId}`);
-        const data = await response.json();
-        
-        setTotalApartments(data.length); // Count apartments based on array length
+        // Fetch apartments owned by the user
+        const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${userId}`);
+        const apartmentsData = await apartmentsResponse.json();
+        setTotalApartments(apartmentsData.length);
+
+        // Fetch all bookings
+        const bookingsResponse = await fetch("http://localhost:8000/api/bookings/");
+        const bookingsData = await bookingsResponse.json();
+
+        // Filter bookings to count only those for the user's apartments
+        const userApartmentIds = apartmentsData.map((apartment) => apartment.id);
+        const userBookings = bookingsData.filter((booking) =>
+          userApartmentIds.includes(booking.apartment)
+        );
+
+        // Set the total number of bookings
+        setTotalBookings(userBookings.length);
       } catch (error) {
-        console.error("Error fetching total apartments:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchTotalApartments();
+    fetchData();
   }, []);
 
   return (
@@ -46,11 +68,13 @@ const OwnerDashboard = () => {
             <p className="text-xl font-bold">{totalApartments}</p>
           </div>
 
+          {/* Total Bookings - Now Dynamic */}
           <div className="bg-green-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold">Total Bookings</h2>
-            <p className="text-xl font-bold">45</p>
+            <p className="text-xl font-bold">{totalBookings}</p>
           </div>
 
+          {/* Pending Reviews - Static for now */}
           <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold">Pending Reviews</h2>
             <p className="text-xl font-bold">8</p>
