@@ -34,7 +34,7 @@ const NavBar = () => {
         localStorage.removeItem("token"); // Clear token
         localStorage.removeItem("user_id"); // Clear token
         localStorage.removeItem("username"); // Clear token
-        localStorage.removeItem("group"); // Clear group
+        localStorage.removeItem("groups"); // Clear group
         setIsLoggedIn(false); // Update state
         navigate("/"); // Redirect to Home
       } else {

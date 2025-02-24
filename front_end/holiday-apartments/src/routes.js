@@ -27,6 +27,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />  {/* Ensure this exists */}
         <Route path="/owner/dashboard" element={<OwnerDashboard />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
+        <Route path="/owner/apartments" element={<Apartments />} />
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
         <Route path="/guest/profile" element={<GuestProfile />} />
 
