@@ -1,19 +1,21 @@
+// Apartments.js
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 import OwnerMenu from '../owner/OwnerMenu';
+import CreateApartmentModal from '../owner/CreateApartmentModal'; // Import the modal component
 
 const Apartments = () => {
   const [apartments, setApartments] = useState([]);
-  const [locations, setLocations] = useState({}); // For storing location names
-  const [locationList, setLocationList] = useState([]); // For storing the list of locations
-  const [location, setLocation] = useState(""); // For storing the selected location ID
-  const [currencies, setCurrencies] = useState({}); // For storing currency codes
-  const [currencyList, setCurrencyList] = useState([]); // For storing the list of currencies
-  const [currency, setCurrency] = useState(""); // For storing the selected currency ID
-  const [facilities, setFacilities] = useState([]); // For storing the list of facilities
-  const [selectedFacilities, setSelectedFacilities] = useState([]); // For storing selected facility IDs
+  const [locations, setLocations] = useState({});
+  const [locationList, setLocationList] = useState([]);
+  const [location, setLocation] = useState("");
+  const [currencies, setCurrencies] = useState({});
+  const [currencyList, setCurrencyList] = useState([]);
+  const [currency, setCurrency] = useState("");
+  const [facilities, setFacilities] = useState([]);
+  const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [userGroup, setUserGroup] = useState(null);
   const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
@@ -23,28 +25,25 @@ const Apartments = () => {
   const [rooms, setRooms] = useState("");
   const [size, setSize] = useState("");
   const [error, setError] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [apartmentIdToUpdate, setApartmentIdToUpdate] = useState(null);
 
-  // Fetch currencies from the API
+  // Fetch currencies, locations, and facilities
   useEffect(() => {
     fetch("http://localhost:8000/api/currencies/")
       .then((response) => response.json())
-      .then((data) => setCurrencyList(data)) // Set the list of currencies
+      .then((data) => setCurrencyList(data))
       .catch((error) => console.error("Error fetching currencies:", error));
-  }, []);
 
-  // Fetch locations from the API
-  useEffect(() => {
     fetch("http://localhost:8000/api/locations/")
       .then((response) => response.json())
-      .then((data) => setLocationList(data)) // Set the list of locations
+      .then((data) => setLocationList(data))
       .catch((error) => console.error("Error fetching locations:", error));
-  }, []);
 
-  // Fetch facilities from the API
-  useEffect(() => {
     fetch("http://localhost:8000/api/facilities/")
       .then((response) => response.json())
-      .then((data) => setFacilities(data)) // Set the list of facilities
+      .then((data) => setFacilities(data))
       .catch((error) => console.error("Error fetching facilities:", error));
   }, []);
 
@@ -108,51 +107,116 @@ const Apartments = () => {
     }
   };
 
-  // Function to handle form submission to create apartment
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/api/apartments/?Content-Type=application/json", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          apartment_name: apartmentName,
-          price: parseFloat(price),
-          currency: parseInt(currency, 10), // Use selected currency ID
-          location: parseInt(location, 10), // Use selected location ID
-          rooms: parseInt(rooms, 10),
-          size: parseFloat(size),
-          facilities: selectedFacilities, // Use selected facility IDs
-          owner: parseInt(userId, 10),
-        }),
-      });
+      const apartmentPayload = {
+        apartment_name: apartmentName,
+        price: parseFloat(price),
+        currency: parseInt(currency, 10),
+        location: parseInt(location, 10),
+        rooms: parseInt(rooms, 10),
+        size: parseFloat(size),
+        facilities: selectedFacilities,
+        owner: parseInt(userId, 10),
+      };
+
+      let response;
+      if (isUpdateMode) {
+        response = await fetch(`http://localhost:8000/api/apartments/${apartmentIdToUpdate}/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apartmentPayload),
+        });
+      } else {
+        response = await fetch("http://localhost:8000/api/apartments/?Content-Type=application/json", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apartmentPayload),
+        });
+      }
 
       if (!response.ok) {
-        throw new Error("Failed to create apartment");
+        throw new Error("Failed to create/update apartment");
       }
 
       const data = await response.json();
-      console.log("Apartment created:", data);
-      alert("Apartment created successfully!");
-      setIsModalOpen(false); // Close the modal
-      // Refresh the apartment list
+      console.log("Apartment created/updated:", data);
+
+      if (isUpdateMode && selectedFiles.length > 0) {
+        const apartmentId = apartmentIdToUpdate || data.id;
+        await Promise.all(
+          selectedFiles.map(async (file) => {
+            const formData = new FormData();
+            formData.append("image", file);
+            formData.append("size_in_bytes", file.size);
+            formData.append("format", file.type.split("/")[1].toUpperCase());
+            formData.append("apartment", apartmentId);
+
+            const uploadResponse = await fetch("http://localhost:8000/api/pictures/?Content-Type=multipart/form-data", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error("Failed to upload picture");
+            }
+          })
+        );
+      }
+
+      alert("Apartment created/updated successfully!");
+      setIsModalOpen(false);
       window.location.reload();
     } catch (error) {
-      console.error("Error creating apartment:", error);
-      setError("Failed to create apartment. Please try again.");
+      console.error("Error creating/updating apartment:", error);
+      setError("Failed to create/update apartment. Please try again.");
     }
   };
 
-  // Function to handle facility selection
   const handleFacilityChange = (facilityId) => {
     setSelectedFacilities((prev) =>
       prev.includes(facilityId)
-        ? prev.filter((id) => id !== facilityId) // Remove if already selected
-        : [...prev, facilityId] // Add if not selected
+        ? prev.filter((id) => id !== facilityId)
+        : [...prev, facilityId]
     );
+  };
+
+  const handleFileChange = (e) => {
+    setSelectedFiles([...e.target.files]);
+  };
+
+  const openCreateModal = () => {
+    setIsUpdateMode(false);
+    setApartmentIdToUpdate(null);
+    setApartmentName("");
+    setPrice("");
+    setCurrency("");
+    setLocation("");
+    setRooms("");
+    setSize("");
+    setSelectedFacilities([]);
+    setSelectedFiles([]);
+    setIsModalOpen(true);
+  };
+
+  const openUpdateModal = (apartment) => {
+    setIsUpdateMode(true);
+    setApartmentIdToUpdate(apartment.id);
+    setApartmentName(apartment.apartment_name);
+    setPrice(apartment.price);
+    setCurrency(apartment.currency);
+    setLocation(apartment.location);
+    setRooms(apartment.rooms);
+    setSize(apartment.size);
+    setSelectedFacilities(apartment.facilities);
+    setSelectedFiles([]);
+    setIsModalOpen(true);
   };
 
   return (
@@ -170,159 +234,40 @@ const Apartments = () => {
 
         {userGroup === "Owners" && (
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
             className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-700"
           >
             Create Apartment
           </button>
         )}
 
-        {/* Modal for creating a new apartment */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">Create New Apartment</h2>
-              <form onSubmit={handleSubmit}>
-                {/* Apartment Name */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Apartment Name</label>
-                  <input
-                    type="text"
-                    value={apartmentName}
-                    onChange={(e) => setApartmentName(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                {/* Price */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                {/* Currency */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Currency</label>
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="">Select Currency</option>
-                    {currencyList.map((currency) => (
-                      <option key={currency.id} value={currency.id}>
-                        {currency.name} ({currency.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Location */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Location</label>
-                  <select
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="">Select Location</option>
-                    {locationList.map((location) => (
-                      <option key={location.id} value={location.id}>
-                        {location.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Rooms */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Rooms</label>
-                  <input
-                    type="number"
-                    value={rooms}
-                    onChange={(e) => setRooms(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                {/* Size */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Size (sq. ft.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={size}
-                    onChange={(e) => setSize(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                {/* Facilities */}
-                <div className="mb-4">
-                  <label className="block text-gray-700">Facilities</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {facilities.map((facility) => (
-                      <div key={facility.id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`facility-${facility.id}`}
-                          checked={selectedFacilities.includes(facility.id)}
-                          onChange={() => handleFacilityChange(facility.id)}
-                          className="mr-2"
-                        />
-                        <label htmlFor={`facility-${facility.id}`} className="flex items-center">
-                          <img
-                            src={facility.logo}
-                            alt={facility.name}
-                            className="w-6 h-6 mr-2"
-                          />
-                          {facility.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Pictures Note */}
-                <div className="mb-4 text-gray-600">
-                  <p>Pictures can be added when updating the apartment.</p>
-                </div>
-
-                {/* Error Message */}
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-
-                {/* Buttons */}
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    Create
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Render the modal component */}
+        <CreateApartmentModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSubmit}
+          isUpdateMode={isUpdateMode}
+          apartmentName={apartmentName}
+          setApartmentName={setApartmentName}
+          price={price}
+          setPrice={setPrice}
+          currency={currency}
+          setCurrency={setCurrency}
+          location={location}
+          setLocation={setLocation}
+          rooms={rooms}
+          setRooms={setRooms}
+          size={size}
+          setSize={setSize}
+          selectedFacilities={selectedFacilities}
+          handleFacilityChange={handleFacilityChange}
+          selectedFiles={selectedFiles}
+          handleFileChange={handleFileChange}
+          error={error}
+          currencyList={currencyList}
+          locationList={locationList}
+          facilities={facilities}
+        />
 
         <div className="w-full max-w-4xl overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
@@ -351,7 +296,7 @@ const Apartments = () => {
                   {userGroup === "Owners" && (
                     <td className="py-3 px-4 border-b flex justify-center space-x-2">
                       <button
-                        onClick={() => navigate(`/update-apartment/${apartment.id}`)}
+                        onClick={() => openUpdateModal(apartment)}
                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
                       >
                         Update
