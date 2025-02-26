@@ -29,6 +29,9 @@ http://127.0.0.1:8000/api/fewoowners/; list all current owners
 
 
 
+
+
+
 to recreate database
 psql -U postgres
 CREATE DATABASE flat_api_db;
@@ -44,4 +47,21 @@ GRANT USAGE, CREATE ON SCHEMA public TO luis;
 
 ideas: 
 1. only customer can book, or the owner of the apartment
-2. weight of facilities will be gotten by everytime people search, and click in one facility, divided by the total of search. 
+2. weight of facilities will be gotten by everytime people search, and click in one facility, divided by the total of search.
+
+
+
+
+psql -U django_user -d django_db
+
+
+docker-compose exec db bash
+psql -U django_user -d django_db
+psql -U luis -d flat_api_db
+
+django_db=# SELECT * FROM your_app_picture WHERE id = 3;
+
+
+flat_api_db
+
+psql -U luis -d flat_api_db
