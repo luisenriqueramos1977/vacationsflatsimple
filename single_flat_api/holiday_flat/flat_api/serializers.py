@@ -40,9 +40,14 @@ class ApartmentSerializer(serializers.ModelSerializer):
         ]
 
     def validate_apartment_name(self, value):
-        """Ensure that apartment_name is unique."""
-        if Apartment.objects.filter(apartment_name=value).exists():
+        """Allow updating with the same name but prevent duplicates when creating a new apartment."""
+        request_method = self.context['request'].method  # Check if it's POST or PUT/PATCH
+        apartment_id = self.instance.id if self.instance else None  # Get ID if updating
+
+        # Check if an apartment with this name exists (excluding the current apartment)
+        if Apartment.objects.filter(apartment_name=value).exclude(id=apartment_id).exists():
             raise serializers.ValidationError("An apartment with this name already exists.")
+
         return value
 
     def validate_owner(self, value):
