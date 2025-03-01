@@ -150,6 +150,7 @@ const Apartments = () => {
 
       if (isUpdateMode && selectedFiles.length > 0) {
         const apartmentId = apartmentIdToUpdate || data.id;
+        console.log("Selected Files:", selectedFiles);
         await Promise.all(
           selectedFiles.map(async (file) => {
             const formData = new FormData();
@@ -158,13 +159,17 @@ const Apartments = () => {
             formData.append("format", file.type.split("/")[1].toUpperCase());
             formData.append("apartment", apartmentId);
 
-            const uploadResponse = await fetch("http://localhost:8000/api/pictures/?Content-Type=multipart/form-data", {
+            const uploadResponse = await fetch("http://localhost:8000/api/pictures/", {
               method: "POST",
+              headers: {
+                "Authorization": localStorage.getItem("token")
+              },
               body: formData,
             });
 
             if (!uploadResponse.ok) {
-              throw new Error("Failed to upload picture");
+              const errorText = await uploadResponse.text();
+              throw new Error(`Failed to upload picture: ${errorText}`);
             }
           })
         );
