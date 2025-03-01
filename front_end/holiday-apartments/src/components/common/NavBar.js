@@ -58,7 +58,7 @@ const NavBar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-blue-500 text-white p-4 flex justify-around">
+    <nav className="fixed top-0 left-0 w-full bg-blue-500 text-white p-4 flex justify-around items-center h-16">
       {menuOptions
         .filter((option) => {
           // Hide current page

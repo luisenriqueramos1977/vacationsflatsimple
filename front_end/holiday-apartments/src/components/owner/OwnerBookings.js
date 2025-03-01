@@ -6,6 +6,7 @@ import OwnerMenu from './OwnerMenu';
 
 const OwnerBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [apartments, setApartments] = useState({});
   const [userGroup, setUserGroup] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,27 +32,32 @@ const OwnerBookings = () => {
     }
 
     if (storedUserId && storedGroups.includes("Owners")) {
-      fetchBookings(storedUserId);
+      fetchApartmentsAndBookings(storedUserId);
     }
   }, []);
 
-  const fetchBookings = async (ownerId) => {
+  const fetchApartmentsAndBookings = async (ownerId) => {
     try {
       // Fetch apartments of the current owner
       const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`);
-      const apartments = await apartmentsResponse.json();
-      const apartmentIds = apartments.map(apartment => apartment.id);
+      const apartmentsData = await apartmentsResponse.json();
+      const apartmentIds = apartmentsData.map(apartment => apartment.id);
+      const apartmentsMap = {};
+      apartmentsData.forEach(apartment => {
+        apartmentsMap[apartment.id] = apartment.apartment_name;
+      });
+      setApartments(apartmentsMap);
 
       // Fetch bookings
       const bookingsResponse = await fetch("http://localhost:8000/api/bookings/");
-      const bookings = await bookingsResponse.json();
+      const bookingsData = await bookingsResponse.json();
 
       // Filter bookings related to the owner's apartments
-      const ownerBookings = bookings.filter(booking => apartmentIds.includes(booking.apartment));
+      const ownerBookings = bookingsData.filter(booking => apartmentIds.includes(booking.apartment));
 
       setBookings(ownerBookings);
     } catch (error) {
-      console.error("Error fetching bookings:", error);
+      console.error("Error fetching apartments and bookings:", error);
     }
   };
 
@@ -241,7 +247,7 @@ const OwnerBookings = () => {
             <thead>
               <tr className="bg-gray-100 text-center">
                 <th className="py-3 px-4 border-b">Guest Name</th>
-                <th className="py-3 px-4 border-b">Apartment ID</th>
+                <th className="py-3 px-4 border-b">Apartment Name</th>
                 <th className="py-3 px-4 border-b">Start Date</th>
                 <th className="py-3 px-4 border-b">End Date</th>
                 <th className="py-3 px-4 border-b">Actions</th>
@@ -254,7 +260,7 @@ const OwnerBookings = () => {
                     {booking.guest_detail}
                   </td>
                   <td className="py-3 px-4 border-b">
-                    {booking.apartment}
+                    {apartments[booking.apartment]}
                   </td>
                   <td className="py-3 px-4 border-b">
                     {booking.start_date}

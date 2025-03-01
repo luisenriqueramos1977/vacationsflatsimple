@@ -10,6 +10,7 @@ import OwnerDashboard from "./components/owner/OwnerDashboard";
 import OwnerProfile from "./components/owner/OwnerProfile"; // ✅ Correct import
 import OwnerGuests from './components/owner/OwnerGuests';
 import OwnerBookings from './components/owner/OwnerBookings'; // Import the OwnerBookings component
+import OwnerReviews from './components/owner/OwnerReviews'; // Import the OwnerReviews component
 import GuestDashboard from "./components/guests/GuestDashboard";
 import GuestProfile from "./components/guests/GuestProfile"; // ✅ Correct import
 import ContactUs from "./components/pages/ContactUs";
@@ -33,6 +34,7 @@ const AppRoutes = () => {
         <Route path="/owner/apartments" element={<Apartments />} />
         <Route path="/owner/guests" element={<OwnerGuests />} />
         <Route path="/owner/bookings" element={<OwnerBookings />} /> {/* Add the OwnerBookings route */}
+        <Route path="/owner/reviews" element={<OwnerReviews />} /> {/* Add the OwnerReviews route */}
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
         <Route path="/guest/profile" element={<GuestProfile />} />
         <Route path="/contact-us" element={<ContactUs />} />
