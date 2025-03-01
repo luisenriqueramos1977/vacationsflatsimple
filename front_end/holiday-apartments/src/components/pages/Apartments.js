@@ -159,10 +159,12 @@ const Apartments = () => {
             formData.append("format", file.type.split("/")[1].toUpperCase());
             formData.append("apartment", apartmentId);
 
+            console.log("header for tokens: ", "Token "+localStorage.getItem("token"));
+
             const uploadResponse = await fetch("http://localhost:8000/api/pictures/", {
               method: "POST",
               headers: {
-                "Authorization": localStorage.getItem("token")
+                "Authorization": "Token "+localStorage.getItem("token")
               },
               body: formData,
             });
