@@ -6,6 +6,8 @@ import Footer from "../common/Footer";
 const OwnerDashboard = () => {
   const [totalApartments, setTotalApartments] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +43,21 @@ const OwnerDashboard = () => {
 
         // Set the total number of bookings
         setTotalBookings(userBookings.length);
+
+        // Fetch all reviews
+        const reviewsResponse = await fetch("http://localhost:8000/api/reviews/");
+        const reviewsData = await reviewsResponse.json();
+
+        // Filter reviews to count only those for the user's apartments
+        const userReviews = reviewsData.filter((review) =>
+          userApartmentIds.includes(review.apartment)
+        );
+
+        // Set the total number of reviews
+        setTotalReviews(userReviews.length);
+
+        // Calculate pending reviews
+        setPendingReviews(userBookings.length - userReviews.length);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -74,10 +91,10 @@ const OwnerDashboard = () => {
             <p className="text-xl font-bold">{totalBookings}</p>
           </div>
 
-          {/* Pending Reviews - Static for now */}
+          {/* Pending Reviews - Now Dynamic */}
           <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold">Pending Reviews</h2>
-            <p className="text-xl font-bold">8</p>
+            <p className="text-xl font-bold">{pendingReviews}</p>
           </div>
         </div>
       </div>
