@@ -184,14 +184,20 @@ const OwnerBookings = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700">Apartment ID</label>
-                  <input
-                    type="number"
+                  <label className="block text-gray-700">Apartment</label>
+                  <select
                     value={apartmentId}
                     onChange={(e) => setApartmentId(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-md"
                     required
-                  />
+                  >
+                    <option value="">Select Apartment</option>
+                    {Object.entries(apartments).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700">Start Date</label>

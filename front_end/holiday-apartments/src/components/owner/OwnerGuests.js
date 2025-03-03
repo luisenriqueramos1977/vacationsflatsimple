@@ -29,26 +29,44 @@ const Guests = () => {
 
   const fetchGuests = async (ownerId) => {
     try {
+      const token = localStorage.getItem("token");
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Authorization", `Token ${token}`);
+
       // Fetch apartments of the current owner
-      const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`);
+      const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`, {
+        method: "GET",
+        headers: myHeaders,
+      });
       const apartments = await apartmentsResponse.json();
       const apartmentIds = apartments.map(apartment => apartment.id);
 
       // Fetch bookings
-      const bookingsResponse = await fetch("http://localhost:8000/api/bookings/");
+      const bookingsResponse = await fetch("http://localhost:8000/api/bookings/", {
+        method: "GET",
+        headers: myHeaders,
+      });
       const bookings = await bookingsResponse.json();
 
       // Filter bookings related to the owner's apartments
       const ownerBookings = bookings.filter(booking => apartmentIds.includes(booking.apartment));
 
-      // Extract unique guest details
-      const uniqueGuests = [...new Set(ownerBookings.map(booking => booking.guest_detail))];
+      // Extract unique guest IDs
+      const uniqueGuestIds = [...new Set(ownerBookings.map(booking => booking.guest_id))];
 
-      console.log("Unique guests:", uniqueGuests);
+      console.log("Unique Guest IDs:", uniqueGuestIds); // Debugging line
 
-      setGuests(uniqueGuests);
+      // Fetch guest details
+      const guestDetails = await Promise.all(uniqueGuestIds.map(async (guestId) => {
+        const guestResponse = await fetch(`http://localhost:8000/api/groups/guests/${guestId}/`, {
+          method: "GET",
+          headers: myHeaders,
+        });
+        return guestResponse.json();
+      }));
 
-
+      setGuests(guestDetails);
     } catch (error) {
       console.error("Error fetching guests:", error);
     }
@@ -71,14 +89,26 @@ const Guests = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100 text-center">
-                <th className="py-3 px-4 border-b">Guest Name</th>
+                <th className="py-3 px-4 border-b">Username</th>
+                <th className="py-3 px-4 border-b">Email</th>
+                <th className="py-3 px-4 border-b">First Name</th>
+                <th className="py-3 px-4 border-b">Last Name</th>
               </tr>
             </thead>
             <tbody>
               {guests.map((guest, index) => (
                 <tr key={index} className="hover:bg-gray-50 text-center">
                   <td className="py-3 px-4 border-b">
-                    {guest}
+                    {guest.username}
+                  </td>
+                  <td className="py-3 px-4 border-b">
+                    {guest.email}
+                  </td>
+                  <td className="py-3 px-4 border-b">
+                    {guest.first_name}
+                  </td>
+                  <td className="py-3 px-4 border-b">
+                    {guest.last_name}
                   </td>
                 </tr>
               ))}

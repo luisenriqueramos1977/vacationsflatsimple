@@ -173,15 +173,11 @@ class BookingSerializer(serializers.ModelSerializer):
         queryset=User.objects.filter(groups__name="Guests"),  # ✅ Only users in Guests group
         write_only=True
     )
-    guest_detail = serializers.SerializerMethodField(read_only=True)
+    guest_id = serializers.IntegerField(source='guest.id', read_only=True)
 
     class Meta:
         model = Booking
-        fields = ['id', 'guest', 'guest_detail', 'apartment', 'start_date', 'end_date']
-
-    def get_guest_detail(self, obj):
-        """Return guest username instead of Guest ID"""
-        return obj.guest.username if obj.guest else None
+        fields = ['id', 'guest', 'guest_id', 'apartment', 'start_date', 'end_date']
 
     def create(self, validated_data):
         """Ensure the guest belongs to the 'Guests' group before creating a booking."""
