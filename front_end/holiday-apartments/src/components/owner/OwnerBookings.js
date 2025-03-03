@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 import OwnerMenu from './OwnerMenu';
+import CreateBookingModal from './CreateBookingModal';
 
 const OwnerBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [apartments, setApartments] = useState({});
+  const [guests, setGuests] = useState({});
   const [userGroup, setUserGroup] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,8 +40,16 @@ const OwnerBookings = () => {
 
   const fetchApartmentsAndBookings = async (ownerId) => {
     try {
+      const token = localStorage.getItem("token");
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Authorization", `Token ${token}`);
+
       // Fetch apartments of the current owner
-      const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`);
+      const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`, {
+        method: "GET",
+        headers: myHeaders,
+      });
       const apartmentsData = await apartmentsResponse.json();
       const apartmentIds = apartmentsData.map(apartment => apartment.id);
       const apartmentsMap = {};
@@ -49,11 +59,30 @@ const OwnerBookings = () => {
       setApartments(apartmentsMap);
 
       // Fetch bookings
-      const bookingsResponse = await fetch("http://localhost:8000/api/bookings/");
+      const bookingsResponse = await fetch("http://localhost:8000/api/bookings/", {
+        method: "GET",
+        headers: myHeaders,
+      });
       const bookingsData = await bookingsResponse.json();
 
       // Filter bookings related to the owner's apartments
       const ownerBookings = bookingsData.filter(booking => apartmentIds.includes(booking.apartment));
+
+      // Fetch guest details
+      const uniqueGuestIds = [...new Set(ownerBookings.map(booking => booking.guest_id))];
+      const guestDetails = await Promise.all(uniqueGuestIds.map(async (guestId) => {
+        const guestResponse = await fetch(`http://localhost:8000/api/groups/guests/${guestId}/`, {
+          method: "GET",
+          headers: myHeaders,
+        });
+        return guestResponse.json();
+      }));
+
+      const guestsMap = {};
+      guestDetails.forEach(guest => {
+        guestsMap[guest.id] = guest.username;
+      });
+      setGuests(guestsMap);
 
       setBookings(ownerBookings);
     } catch (error) {
@@ -89,7 +118,7 @@ const OwnerBookings = () => {
 
     try {
       const bookingPayload = {
-        guest_detail: guestDetail,
+        guest_id: guestDetail,
         apartment: parseInt(apartmentId, 10),
         start_date: startDate,
         end_date: endDate,
@@ -145,7 +174,7 @@ const OwnerBookings = () => {
   const openUpdateModal = (booking) => {
     setIsUpdateMode(true);
     setBookingIdToUpdate(booking.id);
-    setGuestDetail(booking.guest_detail);
+    setGuestDetail(booking.guest_id);
     setApartmentId(booking.apartment);
     setStartDate(booking.start_date);
     setEndDate(booking.end_date);
@@ -168,79 +197,22 @@ const OwnerBookings = () => {
           </button>
         )}
 
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">{isUpdateMode ? "Update Booking" : "Create New Booking"}</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700">Guest Name</label>
-                  <input
-                    type="text"
-                    value={guestDetail}
-                    onChange={(e) => setGuestDetail(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700">Apartment</label>
-                  <select
-                    value={apartmentId}
-                    onChange={(e) => setApartmentId(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="">Select Apartment</option>
-                    {Object.entries(apartments).map(([id, name]) => (
-                      <option key={id} value={id}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700">Start Date</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700">End Date</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    {isUpdateMode ? "Update" : "Create"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <CreateBookingModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSubmit}
+          isUpdateMode={isUpdateMode}
+          guestDetail={guestDetail}
+          setGuestDetail={setGuestDetail}
+          apartmentId={apartmentId}
+          setApartmentId={setApartmentId}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          apartments={apartments}
+          error={error}
+        />
 
         {userGroup === "Owners" && bookings.length === 0 && (
           <p className="text-red-600 font-semibold mb-4">
@@ -263,7 +235,7 @@ const OwnerBookings = () => {
               {bookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50 text-center">
                   <td className="py-3 px-4 border-b">
-                    {booking.guest_detail}
+                    {guests[booking.guest_id]}
                   </td>
                   <td className="py-3 px-4 border-b">
                     {apartments[booking.apartment]}
