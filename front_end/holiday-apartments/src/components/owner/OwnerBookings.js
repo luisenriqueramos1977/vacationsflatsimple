@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
-import OwnerMenu from './OwnerMenu';
 import CreateBookingModal from './CreateBookingModal';
+import OwnerMenu from '../owner/OwnerMenu';
+import GuestMenu from '../guests/GuestMenu'; // Assuming you have a GuestMenu component
 
 const OwnerBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -29,22 +30,58 @@ const OwnerBookings = () => {
       setUserId(parseInt(storedUserId, 10));
     }
 
-    if (storedGroups.includes("Owners")) {
+    if (storedGroups.includes("Guests")) {
+      setUserGroup("Guests");
+    } else if (storedGroups.includes("Owners")) {
       setUserGroup("Owners");
     }
 
-    if (storedUserId && storedGroups.includes("Owners")) {
-      fetchApartmentsAndBookings(storedUserId);
+    if (storedUserId && storedGroups.includes("Guests")) {
+      fetchBookings(storedUserId);
+    } else if (storedUserId && storedGroups.includes("Owners")) {
+      fetchOwnerBookings(storedUserId);
     }
   }, []);
 
-  const fetchApartmentsAndBookings = async (ownerId) => {
+  const fetchBookings = async (guestId) => {
     try {
       const token = localStorage.getItem("token");
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Authorization", `Token ${token}`);
 
+      // Fetch bookings for the current guest
+      const bookingsResponse = await fetch(`http://localhost:8000/api/bookings/?guest_id=${guestId}`, {
+        method: "GET",
+        headers: myHeaders,
+      });
+      const bookingsData = await bookingsResponse.json();
+
+      // Fetch apartments
+      const apartmentsResponse = await fetch("http://localhost:8000/api/apartments/", {
+        method: "GET",
+        headers: myHeaders,
+      });
+      const apartmentsData = await apartmentsResponse.json();
+      const apartmentsMap = {};
+      apartmentsData.forEach(apartment => {
+        apartmentsMap[apartment.id] = apartment.apartment_name;
+      });
+      setApartments(apartmentsMap);
+
+      setBookings(bookingsData);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  const fetchOwnerBookings = async (ownerId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Authorization", `Token ${token}`);
+  
       // Fetch apartments of the current owner
       const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${ownerId}`, {
         method: "GET",
@@ -57,17 +94,19 @@ const OwnerBookings = () => {
         apartmentsMap[apartment.id] = apartment.apartment_name;
       });
       setApartments(apartmentsMap);
-
+  
       // Fetch bookings
       const bookingsResponse = await fetch("http://localhost:8000/api/bookings/", {
         method: "GET",
         headers: myHeaders,
       });
-      const bookingsData = await bookingsResponse.json();
-
+      const bookingsText = await bookingsResponse.text();
+      console.log("Bookings response text:", bookingsText);
+      const bookingsData = JSON.parse(bookingsText);
+  
       // Filter bookings related to the owner's apartments
       const ownerBookings = bookingsData.filter(booking => apartmentIds.includes(booking.apartment));
-
+  
       // Fetch guest details
       const uniqueGuestIds = [...new Set(ownerBookings.map(booking => booking.guest_id))];
       const guestDetails = await Promise.all(uniqueGuestIds.map(async (guestId) => {
@@ -77,16 +116,16 @@ const OwnerBookings = () => {
         });
         return guestResponse.json();
       }));
-
+  
       const guestsMap = {};
       guestDetails.forEach(guest => {
         guestsMap[guest.id] = guest.username;
       });
       setGuests(guestsMap);
-
+  
       setBookings(ownerBookings);
     } catch (error) {
-      console.error("Error fetching apartments and bookings:", error);
+      console.error("Error fetching bookings:", error);
     }
   };
 
@@ -118,7 +157,7 @@ const OwnerBookings = () => {
 
     try {
       const bookingPayload = {
-        guest_id: guestDetail,
+        guest: userId,
         apartment: parseInt(apartmentId, 10),
         start_date: startDate,
         end_date: endDate,
@@ -174,7 +213,7 @@ const OwnerBookings = () => {
   const openUpdateModal = (booking) => {
     setIsUpdateMode(true);
     setBookingIdToUpdate(booking.id);
-    setGuestDetail(booking.guest_id);
+    setGuestDetail(booking.guest);
     setApartmentId(booking.apartment);
     setStartDate(booking.start_date);
     setEndDate(booking.end_date);
@@ -184,11 +223,11 @@ const OwnerBookings = () => {
   return (
     <div className="h-screen flex flex-col">
       <NavBar />
-      {userGroup === "Owners" && <OwnerMenu />}
+      {userGroup === "Owners" ? <OwnerMenu /> : <GuestMenu />}
       <div className="flex flex-1 flex-col items-center mt-16">
         <h1 className="text-3xl font-bold mb-8">Bookings</h1>
 
-        {userGroup === "Owners" && (
+        {userGroup === "Guests" && (
           <button
             onClick={openCreateModal}
             className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-700"
@@ -214,7 +253,7 @@ const OwnerBookings = () => {
           error={error}
         />
 
-        {userGroup === "Owners" && bookings.length === 0 && (
+        {userGroup === "Guests" && bookings.length === 0 && (
           <p className="text-red-600 font-semibold mb-4">
             No Bookings found.
           </p>
@@ -224,7 +263,7 @@ const OwnerBookings = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100 text-center">
-                <th className="py-3 px-4 border-b">Guest Name</th>
+                {userGroup === "Owners" && <th className="py-3 px-4 border-b">Guest Name</th>}
                 <th className="py-3 px-4 border-b">Apartment Name</th>
                 <th className="py-3 px-4 border-b">Start Date</th>
                 <th className="py-3 px-4 border-b">End Date</th>
@@ -234,18 +273,10 @@ const OwnerBookings = () => {
             <tbody>
               {bookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50 text-center">
-                  <td className="py-3 px-4 border-b">
-                    {guests[booking.guest_id]}
-                  </td>
-                  <td className="py-3 px-4 border-b">
-                    {apartments[booking.apartment]}
-                  </td>
-                  <td className="py-3 px-4 border-b">
-                    {booking.start_date}
-                  </td>
-                  <td className="py-3 px-4 border-b">
-                    {booking.end_date}
-                  </td>
+                  {userGroup === "Owners" && <td className="py-3 px-4 border-b">{guests[booking.guest_id]}</td>}
+                  <td className="py-3 px-4 border-b">{apartments[booking.apartment]}</td>
+                  <td className="py-3 px-4 border-b">{booking.start_date}</td>
+                  <td className="py-3 px-4 border-b">{booking.end_date}</td>
                   <td className="py-3 px-4 border-b flex justify-center space-x-2">
                     <button
                       onClick={() => openUpdateModal(booking)}

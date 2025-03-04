@@ -315,7 +315,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        guest_id = self.request.query_params.get('guest_id', None)
+        if guest_id is not None:
+            queryset = queryset.filter(guest_id=guest_id)
+        return queryset
 
 class FacilityViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()

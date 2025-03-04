@@ -5,7 +5,7 @@ const GuestMenu = () => {
 
   const menuItems = [
     { name: "Profile", path: "/guest/profile" },
-    { name: "Bookings", path: "/guest/bookings" },
+    { name: "Bookings", path: "/owner/bookings" },
   ];
 
   return (
