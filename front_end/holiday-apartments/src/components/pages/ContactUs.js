@@ -6,13 +6,34 @@ import Footer from "../common/Footer";
 const ContactUs = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState(""); // Add subject state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email.trim() && message.trim()) {
-      setIsModalOpen(true);
+    if (email.trim() && message.trim() && subject.trim()) {
+      try {
+        const response = await fetch("http://localhost:8000/api/contact/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subject: subject,
+            message: message,
+            email: email,
+          }),
+        });
+
+        if (response.ok) {
+          setIsModalOpen(true);
+        } else {
+          console.error("Failed to send message");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
   };
 
@@ -38,6 +59,17 @@ const ContactUs = () => {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-bold mb-2">Subject</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter the subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               required
             />
           </div>

@@ -518,26 +518,39 @@ def user_logout(request):
     
 
 
+import logging
+from django.core.mail import send_mail
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+logger = logging.getLogger(__name__)
+
 @api_view(["POST"])
 def contact_view(request):
     email = request.data.get("email")
     message = request.data.get("message")
+    subject = request.data.get("subject")
 
-    if not email or not message:
-        return Response({"error": "Email and message are required."}, status=400)
+    if not email or not message or not subject:
+        return Response({"error": "Email, subject, and message are required."}, status=400)
 
     try:
+        # Use Django's send_mail function to send the email
         send_mail(
-            subject="Customer Contact Message",
-            message=f"From: {email}\n\n{message}",
-            from_email="your-email@gmail.com",  # Change to your actual email
-            recipient_list=["your-email@gmail.com"],  # Your Gmail address
+            subject=subject,
+            message=message,
+            from_email=email,
+            recipient_list=["info@tropifruechte.de"],  # Replace with your actual recipient email
             fail_silently=False,
         )
+        logger.info(f"Email sent successfully: {subject} from {email}")
+        print(f"Email sent successfully: {subject} from {email}")
         return Response({"success": "Message sent successfully."})
     except Exception as e:
+        logger.error(f"Error sending email: {str(e)}")
         return Response({"error": str(e)}, status=500)
-
+    
 
 
 

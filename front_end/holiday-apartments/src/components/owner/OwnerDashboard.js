@@ -26,13 +26,25 @@ const OwnerDashboard = () => {
           return;
         }
 
+        // Set up headers
+        const token = localStorage.getItem("token");
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Authorization", `Token ${token}`);
+
+        const requestOptions = {
+          method: "GET",
+          headers: myHeaders,
+          redirect: "follow"
+        };
+
         // Fetch apartments owned by the user
-        const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${userId}`);
+        const apartmentsResponse = await fetch(`http://localhost:8000/api/apartments/?owner=${userId}`, requestOptions);
         const apartmentsData = await apartmentsResponse.json();
         setTotalApartments(apartmentsData.length);
 
         // Fetch all bookings
-        const bookingsResponse = await fetch("http://localhost:8000/api/bookings/");
+        const bookingsResponse = await fetch("http://localhost:8000/api/bookings/", requestOptions);
         const bookingsData = await bookingsResponse.json();
 
         // Filter bookings to count only those for the user's apartments
@@ -45,7 +57,7 @@ const OwnerDashboard = () => {
         setTotalBookings(userBookings.length);
 
         // Fetch all reviews
-        const reviewsResponse = await fetch("http://localhost:8000/api/reviews/");
+        const reviewsResponse = await fetch("http://localhost:8000/api/reviews/", requestOptions);
         const reviewsData = await reviewsResponse.json();
 
         // Filter reviews to count only those for the user's apartments
@@ -104,4 +116,3 @@ const OwnerDashboard = () => {
 };
 
 export default OwnerDashboard;
-
