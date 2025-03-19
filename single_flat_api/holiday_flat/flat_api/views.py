@@ -34,6 +34,7 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import NotFound
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
+from decouple import config, Csv
 
 
 
@@ -520,9 +521,6 @@ def user_logout(request):
 
 import logging
 from django.core.mail import send_mail
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
@@ -537,11 +535,13 @@ def contact_view(request):
 
     try:
         # Use Django's send_mail function to send the email
+        recipient_list = config("recipient_list").split(",")
+        recipient_list = [recipient.strip() for recipient in recipient_list]  # Ensure no extra spaces
         send_mail(
             subject=subject,
             message=message,
             from_email=email,
-            recipient_list=["info@tropifruechte.de"],  # Replace with your actual recipient email
+            recipient_list = recipient_list,
             fail_silently=False,
         )
         logger.info(f"Email sent successfully: {subject} from {email}")
@@ -552,5 +552,50 @@ def contact_view(request):
         return Response({"error": str(e)}, status=500)
     
 
+from rest_framework import status
+import os
 
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def email_config_view(request):
+    if request.method == "GET":
+        email_config = {
+            "EMAIL_BACKEND": config("EMAIL_BACKEND"),
+            "EMAIL_HOST": config("EMAIL_HOST"),
+            "EMAIL_PORT": config("EMAIL_PORT", cast=int),
+            "EMAIL_USE_TLS": config("EMAIL_USE_TLS", cast=bool),
+            "EMAIL_USE_SSL": config("EMAIL_USE_SSL", cast=bool),
+            "EMAIL_HOST_USER": config("EMAIL_HOST_USER"),
+            "EMAIL_HOST_PASSWORD": config("EMAIL_HOST_PASSWORD"),
+            "recipient_list": config("recipient_list", cast=Csv()),
+        }
+        return Response(email_config, status=status.HTTP_200_OK)
+
+    elif request.method == "POST":
+        email_config = request.data
+        with open(os.path.join(os.path.dirname(__file__), '../../.env'), 'r') as file:
+            lines = file.readlines()
+
+        with open(os.path.join(os.path.dirname(__file__), '../../.env'), 'w') as file:
+            for line in lines:
+                if line.startswith("EMAIL_BACKEND"):
+                    file.write(f"EMAIL_BACKEND={email_config.get('EMAIL_BACKEND')}\n")
+                elif line.startswith("EMAIL_HOST"):
+                    file.write(f"EMAIL_HOST={email_config.get('EMAIL_HOST')}\n")
+                elif line.startswith("EMAIL_PORT"):
+                    file.write(f"EMAIL_PORT={email_config.get('EMAIL_PORT')}\n")
+                elif line.startswith("EMAIL_USE_TLS"):
+                    file.write(f"EMAIL_USE_TLS={email_config.get('EMAIL_USE_TLS')}\n")
+                elif line.startswith("EMAIL_USE_SSL"):
+                    file.write(f"EMAIL_USE_SSL={email_config.get('EMAIL_USE_SSL')}\n")
+                elif line.startswith("EMAIL_HOST_USER"):
+                    file.write(f"EMAIL_HOST_USER={email_config.get('EMAIL_HOST_USER')}\n")
+                elif line.startswith("EMAIL_HOST_PASSWORD"):
+                    file.write(f"EMAIL_HOST_PASSWORD={email_config.get('EMAIL_HOST_PASSWORD')}\n")
+                elif line.startswith("recipient_list"):
+                    file.write(f"recipient_list={','.join(email_config.get('recipient_list'))}\n")
+                else:
+                    file.write(line)
+
+        return Response({"success": "Email configuration updated successfully."}, status=status.HTTP_200_OK)
 

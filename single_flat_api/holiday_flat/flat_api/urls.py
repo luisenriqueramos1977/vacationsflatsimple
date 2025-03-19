@@ -15,6 +15,7 @@ from .views import (
     PictureViewSet,
     user_login,
     user_logout,
+    email_config_view
 )
 #added on 22.12.2024
 from django.conf.urls import handler404
@@ -142,6 +143,7 @@ urlpatterns = [
     path('auth/login/', user_login, name='user-login'),
     path('auth/logout/', user_logout, name='user-logout'),
     path('contact/', views.contact_view, name='contact-view'),
+    path('email-config/', email_config_view, name='email_config'),
 ]
 
 #added on 22.12.2024

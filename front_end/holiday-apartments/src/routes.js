@@ -8,6 +8,7 @@ import NavBar from "./components/common/NavBar";
 import Register from "./components/pages/Register"
 import OwnerDashboard from "./components/owner/OwnerDashboard";
 import OwnerProfile from "./components/owner/OwnerProfile"; // ✅ Correct import
+import EmailSender from "./components/owner/EmailSender"; // ✅ Correct import
 import OwnerGuests from './components/owner/OwnerGuests';
 import OwnerBookings from './components/owner/OwnerBookings'; // Import the OwnerBookings component
 import OwnerReviews from './components/owner/OwnerReviews'; // Import the OwnerReviews component
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />  {/* Ensure this exists */}
         <Route path="/owner/dashboard" element={<OwnerDashboard />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
+        <Route path="/owner/emailsender" element={<EmailSender />} />
         <Route path="/owner/apartments" element={<Apartments />} />
         <Route path="/owner/guests" element={<OwnerGuests />} />
         <Route path="/owner/bookings" element={<OwnerBookings />} /> {/* Add the OwnerBookings route */}

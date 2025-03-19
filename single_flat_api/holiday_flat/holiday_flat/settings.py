@@ -211,14 +211,13 @@ REST_FRAMEWORK = {
 
 #emial configuration
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587  # Change to 587 for TLS
-EMAIL_USE_TLS = True  # Use TLS instead of SSL
-EMAIL_USE_SSL = False  # Ensure SSL is disabled
-EMAIL_HOST_USER = "luisenriqueramos1977@gmail.com"
-EMAIL_HOST_PASSWORD = "jjnv mlst zkgf rbxr"  # Use App Password if available
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = config("EMAIL_BACKEND")#"django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST")#"smtp.gmail.com"
+EMAIL_PORT = config("EMAIL_PORT",cast=int)#587  # Change to 587 for TLS
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool) #True  # Use TLS instead of SSL
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool) #False  # Ensure SSL is disabled
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="info@tropifruechte.de")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="Lr12610418")
 
 '''
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

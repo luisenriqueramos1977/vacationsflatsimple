@@ -6,7 +6,7 @@ const OwnerMenu = () => {
     { name: "Apartments", path: "/owner/apartments" },
     { name: "Guests", path: "/owner/guests" },
     { name: "Bookings", path: "/owner/bookings" },
-    //{ name: "Analytics", path: "/owner/analytics" },
+    { name: "Email Sender", path: "/owner/emailsender" },
     { name: "Reviews", path: "/owner/reviews" },
   ];
 
