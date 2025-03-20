@@ -15,7 +15,6 @@ const OwnerBookings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [bookingIdToUpdate, setBookingIdToUpdate] = useState(null);
-  const [guestDetail, setGuestDetail] = useState("");
   const [apartmentId, setApartmentId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -169,7 +168,7 @@ const OwnerBookings = () => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Token ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(bookingPayload),
         });
@@ -178,7 +177,7 @@ const OwnerBookings = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Token ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(bookingPayload),
         });
@@ -203,7 +202,6 @@ const OwnerBookings = () => {
   const openCreateModal = () => {
     setIsUpdateMode(false);
     setBookingIdToUpdate(null);
-    setGuestDetail("");
     setApartmentId("");
     setStartDate("");
     setEndDate("");
@@ -213,7 +211,6 @@ const OwnerBookings = () => {
   const openUpdateModal = (booking) => {
     setIsUpdateMode(true);
     setBookingIdToUpdate(booking.id);
-    setGuestDetail(booking.guest);
     setApartmentId(booking.apartment);
     setStartDate(booking.start_date);
     setEndDate(booking.end_date);
@@ -240,9 +237,6 @@ const OwnerBookings = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleSubmit}
-          isUpdateMode={isUpdateMode}
-          guestDetail={guestDetail}
-          setGuestDetail={setGuestDetail}
           apartmentId={apartmentId}
           setApartmentId={setApartmentId}
           startDate={startDate}

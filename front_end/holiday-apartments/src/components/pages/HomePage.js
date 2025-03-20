@@ -18,6 +18,17 @@ const HomePage = () => {
 
   const navigate = useNavigate();
 
+  // Function to load PayPal SDK script
+  const loadPayPalScript = (clientId) => {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('PayPal SDK could not be loaded.'));
+      document.body.appendChild(script);
+    });
+  };
+
   // Fetch images from the API
   useEffect(() => {
     const fetchImages = async () => {
@@ -39,6 +50,18 @@ const HomePage = () => {
     };
 
     fetchImages();
+  }, []);
+
+  // Load PayPal SDK
+  useEffect(() => {
+    const clientId = "YOUR_PAYPAL_CLIENT_ID"; // Replace with your PayPal client ID
+    loadPayPalScript(clientId)
+      .then(() => {
+        console.log("PayPal SDK loaded successfully.");
+      })
+      .catch((error) => {
+        console.error("Error loading PayPal SDK:", error);
+      });
   }, []);
 
   const handleSearch = async () => {
