@@ -136,7 +136,7 @@ const OwnerBookings = () => {
       const response = await fetch(`http://localhost:8000/api/bookings/${bookingId}/`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Token ${localStorage.getItem("token")}`,
         },
       });
 

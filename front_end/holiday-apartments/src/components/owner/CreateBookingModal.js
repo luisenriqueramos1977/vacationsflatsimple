@@ -5,8 +5,6 @@ const CreateBookingModal = ({
   onClose,
   onSubmit,
   isUpdateMode,
-  guestDetail,
-  setGuestDetail,
   apartmentId,
   setApartmentId,
   startDate,
@@ -23,16 +21,6 @@ const CreateBookingModal = ({
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">{isUpdateMode ? "Update Booking" : "Create New Booking"}</h2>
         <form onSubmit={onSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700">Guest Name</label>
-            <input
-              type="text"
-              value={guestDetail}
-              onChange={(e) => setGuestDetail(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
           <div className="mb-4">
             <label className="block text-gray-700">Apartment</label>
             <select
