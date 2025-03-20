@@ -54,7 +54,7 @@ const HomePage = () => {
 
   // Load PayPal SDK
   useEffect(() => {
-    const clientId = "YOUR_PAYPAL_CLIENT_ID"; // Replace with your PayPal client ID
+    const clientId = "AVYu3LlFUeje4vcu3bgxbNjvSypZDwVrDu3o20yZpisnH7B2HRXCDhTfl1aaawVw_y_5FCoa1AaQ4Vwv"; // Replace with your PayPal client ID
     loadPayPalScript(clientId)
       .then(() => {
         console.log("PayPal SDK loaded successfully.");

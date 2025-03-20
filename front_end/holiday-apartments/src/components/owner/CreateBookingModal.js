@@ -20,6 +20,7 @@ const CreateBookingModal = ({
 
   useEffect(() => {
     if (isAvailable && window.paypal) {
+      console.log("Rendering PayPal button...");
       window.paypal.Buttons({
         createOrder: (data, actions) => {
           return actions.order.create({
