@@ -4,6 +4,8 @@ import Locations from "./components/pages/Locations";
 import Apartments from "./components/pages/Apartments";
 import Booking from "./components/pages/Booking";
 import Login from "./components/pages/Login";
+import ForgotPassword from "./components/pages/ForgotPassword";
+import ResetPassword from "./components/pages/ResetPassword";
 import NavBar from "./components/common/NavBar";
 import Register from "./components/pages/Register"
 import OwnerDashboard from "./components/owner/OwnerDashboard";
@@ -30,6 +32,8 @@ const AppRoutes = () => {
         <Route path="/booking" element={<Booking />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />  {/* Ensure this exists */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/owner/dashboard" element={<OwnerDashboard />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
         <Route path="/owner/emailsender" element={<EmailSender />} />

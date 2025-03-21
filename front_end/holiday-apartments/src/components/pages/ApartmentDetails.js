@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // Import carousel styles
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css"; // Import calendar styles
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
@@ -10,6 +12,7 @@ const ApartmentDetails = () => {
   const [apartment, setApartment] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [currencyName, setCurrencyName] = useState("");
+  const [bookings, setBookings] = useState([]);
 
   // Fetch apartment details based on the ID
   useEffect(() => {
@@ -33,9 +36,33 @@ const ApartmentDetails = () => {
       .catch((error) => console.error("Error fetching apartment details:", error));
   }, [id]);
 
+  // Fetch bookings for the apartment
+  useEffect(() => {
+    fetch(`http://localhost:8000/api/apartments/${id}/bookings/`)
+      .then((response) => response.json())
+      .then((data) => setBookings(data))
+      .catch((error) => console.error("Error fetching bookings:", error));
+  }, [id]);
+
   if (!apartment) {
     return <div>Loading...</div>;
   }
+
+  // Function to determine if a date is booked
+  const isBooked = (date) => {
+    return bookings.some((booking) => {
+      const startDate = new Date(booking.start_date);
+      const endDate = new Date(booking.end_date);
+      return date >= startDate && date <= endDate;
+    });
+  };
+
+  // Function to apply tile class based on booking status
+  const tileClassName = ({ date, view }) => {
+    if (view === "month" && isBooked(date)) {
+      return "booked";
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col">
@@ -57,6 +84,11 @@ const ApartmentDetails = () => {
             <p className="text-lg mb-2">
               <span className="font-semibold">Size:</span> {apartment.size} sqm
             </p>
+            <h2 className="text-xl font-bold mt-4 mb-2">Availability</h2>
+            <Calendar
+              className="custom-calendar"
+              tileClassName={tileClassName}
+            />
           </div>
 
           {/* Right Column: Pictures Carousel */}

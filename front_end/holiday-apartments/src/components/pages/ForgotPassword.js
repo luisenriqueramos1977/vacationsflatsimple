@@ -65,15 +65,20 @@ const Login = () => {
           />
           <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
 
-          {/* Links Container */}
-          <div className="flex justify-between mt-4">
+          {/* Forgot Password Link */}
+          <p className="text-center mt-4">
             <button onClick={() => navigate("/forgot-password")} className="text-blue-600 underline">
               Forgot Password?
             </button>
+          </p>
+
+          {/* Registration Link */}
+          <p className="text-center mt-4">
+            <span> Aren't you registered yet? </span>
             <button onClick={() => navigate("/register")} className="text-blue-600 underline">
               Register here
             </button>
-          </div>
+          </p>
         </form>
       </div>
       <Footer />
