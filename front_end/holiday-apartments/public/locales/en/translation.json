@@ -1,0 +1,11 @@
+{
+    "welcome": "Welcome to Holiday Apartments",
+    "location": "Location",
+    "min_price": "Min Price",
+    "max_price": "Max Price",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "search": "Search",
+    "no_images": "No images available",
+    "failed_to_load_images": "Failed to load images. Please try again later."
+  }

@@ -6,8 +6,10 @@ import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const [location, setLocation] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -45,16 +47,21 @@ const HomePage = () => {
         setApartmentImages(images);
       } catch (error) {
         console.error("Error fetching images:", error);
-        setError("Failed to load images. Please try again later.");
+        setError(t("failed_to_load_images"));
       }
     };
 
     fetchImages();
-  }, []);
+  }, [t]);
 
   // Load PayPal SDK
   useEffect(() => {
-    const clientId = "AVYu3LlFUeje4vcu3bgxbNjvSypZDwVrDu3o20yZpisnH7B2HRXCDhTfl1aaawVw_y_5FCoa1AaQ4Vwv"; // Replace with your PayPal client ID
+    const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
+    //const clientId = "AVYu3LlFUeje4vcu3bgxbNjvSypZDwVrDu3o20yZpisnH7B2HRXCDhTfl1aaawVw_y_5FCoa1AaQ4Vwv"; // Hardcoded for testing
+    if (!clientId) {
+      console.error("PayPal Client ID is not set in the environment variables.");
+      return;
+    }
     loadPayPalScript(clientId)
       .then(() => {
         console.log("PayPal SDK loaded successfully.");
@@ -121,16 +128,16 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen">
       <NavBar />
 
-      <h1 className="text-3xl font-bold text-center mt-4">Welcome to Holiday Apartments</h1>
+      <h1 className="text-3xl font-bold text-center mt-4">{t("welcome")}</h1>
 
       {/* Search Bar */}
       <div className="flex items-center justify-center gap-4 mt-10">
         {[
-          { placeholder: "Location", value: location, setValue: setLocation },
-          { placeholder: "Min Price", value: minPrice, setValue: setMinPrice },
-          { placeholder: "Max Price", value: maxPrice, setValue: setMaxPrice },
-          { placeholder: "Start Date", value: startDate, setValue: setStartDate, type: "date" },
-          { placeholder: "End Date", value: endDate, setValue: setEndDate, type: "date" },
+          { placeholder: t("location"), value: location, setValue: setLocation },
+          { placeholder: t("min_price"), value: minPrice, setValue: setMinPrice },
+          { placeholder: t("max_price"), value: maxPrice, setValue: setMaxPrice },
+          { placeholder: t("start_date"), value: startDate, setValue: setStartDate, type: "date" },
+          { placeholder: t("end_date"), value: endDate, setValue: setEndDate, type: "date" },
         ].map(({ placeholder, value, setValue, type = "text" }, index) => (
           <input
             key={index}
@@ -145,7 +152,7 @@ const HomePage = () => {
           onClick={handleSearch}
           className="w-[50mm] h-[15mm] bg-red-500 text-white font-bold border-2 border-gold"
         >
-          Search
+          {t("search")}
         </button>
       </div>
 
@@ -170,7 +177,7 @@ const HomePage = () => {
               ))
             ) : (
               <SwiperSlide>
-                <p className="text-center text-gray-500">No images available</p>
+                <p className="text-center text-gray-500">{t("no_images")}</p>
               </SwiperSlide>
             )}
           </Swiper>

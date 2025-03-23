@@ -18,6 +18,7 @@ import GuestDashboard from "./components/guests/GuestDashboard";
 import GuestProfile from "./components/guests/GuestProfile"; // ✅ Correct import
 import ContactUs from "./components/pages/ContactUs";
 import ApartmentDetails from './components/pages/ApartmentDetails';
+import NotFound from './components/pages/NotFound';
 
 
 const AppRoutes = () => {
@@ -44,6 +45,8 @@ const AppRoutes = () => {
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
         <Route path="/guest/profile" element={<GuestProfile />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 page */}
+
       </Routes>
     </Router>
   );

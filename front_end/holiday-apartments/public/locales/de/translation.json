@@ -1,0 +1,11 @@
+{
+    "welcome": "Willkommen bei Ferienwohnungen",
+    "location": "Ort",
+    "min_price": "Mindestpreis",
+    "max_price": "Höchstpreis",
+    "start_date": "Startdatum",
+    "end_date": "Enddatum",
+    "search": "Suche",
+    "no_images": "Keine Bilder verfügbar",
+    "failed_to_load_images": "Bilder konnten nicht geladen werden. Bitte versuchen Sie es später erneut."
+  }
