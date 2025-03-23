@@ -1,11 +1,22 @@
 {
-    "welcome": "Welcome to Holiday Apartments",
-    "location": "Location",
-    "min_price": "Min Price",
-    "max_price": "Max Price",
-    "start_date": "Start Date",
-    "end_date": "End Date",
-    "search": "Search",
-    "no_images": "No images available",
-    "failed_to_load_images": "Failed to load images. Please try again later."
-  }
+  "welcome": "Welcome to Holiday Apartments",
+  "location": "Location",
+  "min_price": "Min Price",
+  "max_price": "Max Price",
+  "start_date": "Start Date",
+  "end_date": "End Date",
+  "search": "Search",
+  "no_images": "No images available",
+  "failed_to_load_images": "Failed to load images. Please try again later.",
+  "contact_us": "Contact Us",
+  "house_rules": "House Rules",
+  "terms_conditions": "Terms & Conditions",
+  "site_map": "Site Map",
+  "language": "Language",
+  "home": "Home",
+  "locations": "Locations",
+  "apartments": "Apartments",
+  "login": "Login",
+  "dashboard": "Dashboard",
+  "logout": "Logout"
+}

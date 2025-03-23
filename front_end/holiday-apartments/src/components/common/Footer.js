@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 const Footer = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const changeLanguage = (lng) => {
@@ -19,20 +19,20 @@ const Footer = () => {
     <footer className="fixed bottom-0 left-0 w-full bg-gray-900 text-white p-4 text-center">
       <div className="flex justify-center gap-6 text-sm">
         <Link to="/contact-us" className="hover:underline">
-          Contact Us
+          {t("contact_us")}
         </Link>
         <Link to="/house-rules" className="hover:underline">
-          House Rules
+          {t("house_rules")}
         </Link>
         <Link to="/terms" className="hover:underline">
-          Terms & Conditions
+          {t("terms_conditions")}
         </Link>
         <Link to="/site-map" className="hover:underline">
-          Site Map
+          {t("site_map")}
         </Link>
         <div className="relative inline-block text-left">
           <button onClick={toggleDropdown} className="hover:underline">
-            Language
+            {t("language")}
           </button>
           {isDropdownOpen && (
             <div className="absolute right-0 mb-2 w-32 bg-white text-black rounded-md shadow-lg dropdown-menu">

@@ -1,7 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const NavBar = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,10 +53,10 @@ const NavBar = () => {
   };
 
   const menuOptions = [
-    { path: "/", label: "Home" },
-    { path: "/locations", label: "Locations" },
-    { path: "/apartments", label: "Apartments" },
-    { path: "/login", label: "Login" },
+    { path: "/", label: t("home") },
+    { path: "/locations", label: t("locations") },
+    { path: "/apartments", label: t("apartments") },
+    { path: "/login", label: t("login") },
   ];
 
   return (
@@ -76,14 +78,14 @@ const NavBar = () => {
       {/* Conditionally render Dashboard button */}
       {isLoggedIn && !location.pathname.includes("/dashboard") && (
         <Link to={getDashboardPath()} className="px-4">
-          Dashboard
+          {t("dashboard")}
         </Link>
       )}
 
       {/* Logout button */}
       {isLoggedIn && (
         <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
-          Logout
+          {t("logout")}
         </button>
       )}
     </nav>

@@ -1,11 +1,22 @@
 {
-    "welcome": "Willkommen bei Ferienwohnungen",
-    "location": "Ort",
-    "min_price": "Mindestpreis",
-    "max_price": "Höchstpreis",
-    "start_date": "Startdatum",
-    "end_date": "Enddatum",
-    "search": "Suche",
-    "no_images": "Keine Bilder verfügbar",
-    "failed_to_load_images": "Bilder konnten nicht geladen werden. Bitte versuchen Sie es später erneut."
-  }
+  "welcome": "Willkommen bei Ferienwohnungen",
+  "location": "Ort",
+  "min_price": "Mindestpreis",
+  "max_price": "Höchstpreis",
+  "start_date": "Startdatum",
+  "end_date": "Enddatum",
+  "search": "Suche",
+  "no_images": "Keine Bilder verfügbar",
+  "failed_to_load_images": "Bilder konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+  "contact_us": "Kontaktieren Sie uns",
+  "house_rules": "Hausregeln",
+  "terms_conditions": "Geschäftsbedingungen",
+  "site_map": "Seitenverzeichnis",
+  "language": "Sprache",
+  "home": "Startseite",
+  "locations": "Standorte",
+  "apartments": "Wohnungen",
+  "login": "Anmelden",
+  "dashboard": "Armaturenbrett",
+  "logout": "Abmelden"
+}

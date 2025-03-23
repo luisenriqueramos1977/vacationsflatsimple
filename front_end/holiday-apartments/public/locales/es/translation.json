@@ -1,11 +1,22 @@
 {
-    "welcome": "Bienvenido a Apartamentos de Vacaciones",
-    "location": "Ubicación",
-    "min_price": "Precio Mínimo",
-    "max_price": "Precio Máximo",
-    "start_date": "Fecha de Inicio",
-    "end_date": "Fecha de Fin",
-    "search": "Buscar",
-    "no_images": "No hay imágenes disponibles",
-    "failed_to_load_images": "No se pudieron cargar las imágenes. Por favor, inténtelo de nuevo más tarde."
-  }
+  "welcome": "Bienvenido a Apartamentos de Vacaciones",
+  "location": "Ubicación",
+  "min_price": "Precio Mínimo",
+  "max_price": "Precio Máximo",
+  "start_date": "Fecha de Inicio",
+  "end_date": "Fecha de Fin",
+  "search": "Buscar",
+  "no_images": "No hay imágenes disponibles",
+  "failed_to_load_images": "No se pudieron cargar las imágenes. Por favor, inténtelo de nuevo más tarde.",
+  "contact_us": "Contáctenos",
+  "house_rules": "Reglas de la Casa",
+  "terms_conditions": "Términos y Condiciones",
+  "site_map": "Mapa del Sitio",
+  "language": "Idioma",
+  "home": "Inicio",
+  "locations": "Ubicaciones",
+  "apartments": "Apartamentos",
+  "login": "Iniciar Sesión",
+  "dashboard": "Tablero",
+  "logout": "Cerrar Sesión"
+}
