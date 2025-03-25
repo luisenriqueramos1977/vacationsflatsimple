@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import OwnerMenu from "./OwnerMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const EmailSender = () => {
+  const { t } = useTranslation();
   const [emailConfig, setEmailConfig] = useState({
     EMAIL_BACKEND: "",
     EMAIL_HOST: "",
@@ -20,7 +22,7 @@ const EmailSender = () => {
       const authToken = localStorage.getItem("token");
 
       if (!authToken) {
-        console.error("Missing authentication token.");
+        console.error(t("missing_authentication_token"));
         return;
       }
 
@@ -34,18 +36,18 @@ const EmailSender = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch email config (Status: ${response.status})`);
+          throw new Error(`${t("failed_to_fetch_email_config")} (Status: ${response.status})`);
         }
 
         const data = await response.json();
         setEmailConfig(data);
       } catch (error) {
-        console.error("Error fetching email config:", error);
+        console.error(t("error_fetching_email_config"), error);
       }
     };
 
     fetchEmailConfig();
-  }, []);
+  }, [t]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -61,7 +63,7 @@ const EmailSender = () => {
     const authToken = localStorage.getItem("token");
 
     if (!authToken) {
-      alert("Missing authentication details.");
+      alert(t("missing_authentication_token"));
       return;
     }
 
@@ -76,13 +78,13 @@ const EmailSender = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update email config");
+        throw new Error(t("failed_to_update_email_config"));
       }
 
-      alert("Email configuration updated successfully!");
+      alert(t("email_configuration_updated_successfully"));
     } catch (error) {
-      console.error("Error updating email config:", error);
-      alert("Failed to update email configuration. Please try again.");
+      console.error(t("error_updating_email_config"), error);
+      alert(t("failed_to_update_email_configuration"));
     }
   };
 
@@ -91,10 +93,10 @@ const EmailSender = () => {
       <NavBar />
       <OwnerMenu />
       <div className="ml-64 p-6 w-full">
-        <h1 className="text-3xl font-bold mb-4">Email Configuration</h1>
+        <h1 className="text-3xl font-bold mb-4">{t("email_configuration")}</h1>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Backend</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email_backend")}</label>
             <input
               type="text"
               name="EMAIL_BACKEND"
@@ -104,7 +106,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Host</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email_host")}</label>
             <input
               type="text"
               name="EMAIL_HOST"
@@ -114,7 +116,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Port</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email_port")}</label>
             <input
               type="number"
               name="EMAIL_PORT"
@@ -124,7 +126,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Use TLS</label>
+            <label className="block text-sm font-medium text-gray-700">{t("use_tls")}</label>
             <input
               type="checkbox"
               name="EMAIL_USE_TLS"
@@ -134,7 +136,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Use SSL</label>
+            <label className="block text-sm font-medium text-gray-700">{t("use_ssl")}</label>
             <input
               type="checkbox"
               name="EMAIL_USE_SSL"
@@ -144,7 +146,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Host User</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email_host_user")}</label>
             <input
               type="text"
               name="EMAIL_HOST_USER"
@@ -154,7 +156,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Host Password</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email_host_password")}</label>
             <input
               type="password"
               name="EMAIL_HOST_PASSWORD"
@@ -164,7 +166,7 @@ const EmailSender = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Recipient List</label>
+            <label className="block text-sm font-medium text-gray-700">{t("recipient_list")}</label>
             <input
               type="text"
               name="recipient_list"
@@ -177,7 +179,7 @@ const EmailSender = () => {
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           >
-            Update Email Configuration
+            {t("update_email_configuration")}
           </button>
         </form>
       </div>

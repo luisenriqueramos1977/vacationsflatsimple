@@ -6,8 +6,10 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css"; // Import calendar styles
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const ApartmentDetails = () => {
+  const { t } = useTranslation();
   const { id } = useParams(); // Get the apartment ID from the URL
   const [apartment, setApartment] = useState(null);
   const [locationName, setLocationName] = useState("");
@@ -45,7 +47,7 @@ const ApartmentDetails = () => {
   }, [id]);
 
   if (!apartment) {
-    return <div>Loading...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   // Function to determine if a date is booked
@@ -73,18 +75,18 @@ const ApartmentDetails = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h1 className="text-3xl font-bold mb-4">{apartment.apartment_name}</h1>
             <p className="text-lg mb-2">
-              <span className="font-semibold">Price:</span> {apartment.price} {currencyName}
+              <span className="font-semibold">{t("price")}:</span> {apartment.price} {currencyName}
             </p>
             <p className="text-lg mb-2">
-              <span className="font-semibold">Location:</span> {locationName}
+              <span className="font-semibold">{t("location")}:</span> {locationName}
             </p>
             <p className="text-lg mb-2">
-              <span className="font-semibold">Rooms:</span> {apartment.rooms}
+              <span className="font-semibold">{t("rooms")}:</span> {apartment.rooms}
             </p>
             <p className="text-lg mb-2">
-              <span className="font-semibold">Size:</span> {apartment.size} sqm
+              <span className="font-semibold">{t("size")}:</span> {apartment.size} sqm
             </p>
-            <h2 className="text-xl font-bold mt-4 mb-2">Availability</h2>
+            <h2 className="text-xl font-bold mt-4 mb-2">{t("availability")}</h2>
             <Calendar
               className="custom-calendar"
               tileClassName={tileClassName}
@@ -93,7 +95,7 @@ const ApartmentDetails = () => {
 
           {/* Right Column: Pictures Carousel */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Pictures</h2>
+            <h2 className="text-xl font-bold mb-4">{t("pictures")}</h2>
             <Carousel showThumbs={false} infiniteLoop useKeyboardArrows autoPlay>
               {apartment.pictures.map((picture) => (
                 <div key={picture.id}>

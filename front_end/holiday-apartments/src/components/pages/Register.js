@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -13,11 +15,11 @@ const Register = () => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      alert(t("passwords_do_not_match"));
       return;
     }
 
-    console.log("Registering with:", { email, password });
+    console.log(t("registering_with"), { email, password });
     // Add registration logic here
   };
 
@@ -28,13 +30,13 @@ const Register = () => {
       {/* Centered Form */}
       <div className="flex-grow flex items-center justify-center">
         <div className="w-[300px] p-6 border rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
+          <h2 className="text-2xl font-bold text-center mb-4">{t("register")}</h2>
 
           <form onSubmit={handleRegister} className="flex flex-col gap-4">
             {/* Email Field */}
             <input
               type="email"
-              placeholder="Email"
+              placeholder={t("email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="border p-2 rounded"
@@ -44,7 +46,7 @@ const Register = () => {
             {/* Password Field */}
             <input
               type="password"
-              placeholder="Password"
+              placeholder={t("password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="border p-2 rounded"
@@ -54,7 +56,7 @@ const Register = () => {
             {/* Confirm Password Field */}
             <input
               type="password"
-              placeholder="Repeat Password"
+              placeholder={t("repeat_password")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="border p-2 rounded"
@@ -63,15 +65,15 @@ const Register = () => {
 
             {/* Register Button */}
             <button type="submit" className="bg-blue-500 text-white p-2 rounded font-bold">
-              Register
+              {t("register")}
             </button>
           </form>
 
           {/* Login Link */}
           <p className="text-center mt-4">
-            <span> Already have an account? </span>
+            <span>{t("already_have_account")}</span>
             <button onClick={() => navigate("/login")} className="text-blue-600 underline">
-              Login here
+              {t("login_here")}
             </button>
           </p>
         </div>

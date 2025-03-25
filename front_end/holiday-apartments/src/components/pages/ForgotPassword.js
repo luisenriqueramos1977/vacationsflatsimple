@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,10 +37,10 @@ const Login = () => {
           navigate("/guest/dashboard"); // Redirect to GuestDashboard
         }
       } else {
-        setError(data.error || "Invalid credentials. Please try again.");
+        setError(data.error || t("invalid_credentials"));
       }
     } catch (error) {
-      setError("Something went wrong. Please try again later.");
+      setError(t("something_went_wrong"));
     }
   };
 
@@ -47,36 +49,36 @@ const Login = () => {
       <NavBar />
       <div className="flex items-center justify-center w-full min-h-screen">
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96 text-center">
-          <h2 className="text-2xl mb-4">Login</h2>
+          <h2 className="text-2xl mb-4">{t("login")}</h2>
           {error && <div className="text-red-500 mb-4">{error}</div>}
           <input
             type="text"
-            placeholder="Username"
+            placeholder={t("username")}
             value={user}
             onChange={(e) => setUser(e.target.value)}
             className="w-full p-2 border rounded mb-4"
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t("password")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-2 border rounded mb-4"
           />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">{t("login")}</button>
 
           {/* Forgot Password Link */}
           <p className="text-center mt-4">
             <button onClick={() => navigate("/forgot-password")} className="text-blue-600 underline">
-              Forgot Password?
+              {t("forgot_password")}
             </button>
           </p>
 
           {/* Registration Link */}
           <p className="text-center mt-4">
-            <span> Aren't you registered yet? </span>
+            <span>{t("not_registered")}</span>
             <button onClick={() => navigate("/register")} className="text-blue-600 underline">
-              Register here
+              {t("register_here")}
             </button>
           </p>
         </form>

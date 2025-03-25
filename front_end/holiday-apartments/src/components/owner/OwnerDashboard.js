@@ -13,11 +13,31 @@ const OwnerDashboard = () => {
     const fetchData = async () => {
       try {
         // Check if the user is an owner
-        const groups = JSON.parse(localStorage.getItem("groups") || "[]");
-        if (!groups.includes("Owners")) {
-          console.error("User is not an owner.");
-          return;
-        }
+try {
+  const rawGroups = localStorage.getItem("groups");
+  let groups = [];
+  
+  if (rawGroups) {
+    try {
+      // Attempt to parse as JSON
+      const parsed = JSON.parse(rawGroups);
+      // Handle both array and single string cases
+      groups = Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      // If JSON parsing fails, treat as plain string
+      groups = [rawGroups];
+    }
+  }
+
+  // Check for exact "Owners" string match
+  if (!groups.some(group => group === "Owners")) {
+    console.error("User is not an owner.");
+    return;
+  }
+} catch (error) {
+  console.error("Error checking owner status:", error);
+  return;
+}
 
         // Fetch user ID from local storage
         const userId = localStorage.getItem("user_id");

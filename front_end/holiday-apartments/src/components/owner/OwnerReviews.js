@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 import OwnerMenu from './OwnerMenu';
+import { useTranslation } from 'react-i18next';
 
 const OwnerReviews = () => {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [userGroup, setUserGroup] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -12,7 +14,19 @@ const OwnerReviews = () => {
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
-    const storedGroups = JSON.parse(localStorage.getItem("groups") || "[]");
+    const rawGroups = localStorage.getItem("groups");
+    let storedGroups = [];
+    if (rawGroups) {
+      try {
+        // Attempt to parse as JSON
+        const parsed = JSON.parse(rawGroups);
+        // Handle both array and single string cases
+        storedGroups = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        // If JSON parsing fails, treat as plain string
+        storedGroups = [rawGroups];
+      }
+    }
 
     if (storedUserId) {
       setUserId(parseInt(storedUserId, 10));
@@ -43,12 +57,12 @@ const OwnerReviews = () => {
 
       setReviews(ownerReviews);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      console.error(t("error_fetching_reviews"), error);
     }
   };
 
   const handleDelete = async (reviewId) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    if (!window.confirm(t("confirm_delete_review"))) return;
 
     try {
       const response = await fetch(`http://localhost:8000/api/reviews/${reviewId}/`, {
@@ -60,13 +74,13 @@ const OwnerReviews = () => {
 
       if (response.ok) {
         setReviews((prev) => prev.filter((review) => review.id !== reviewId));
-        alert("Review deleted successfully!");
+        alert(t("review_deleted_successfully"));
       } else {
-        alert("Error deleting review. Please try again.");
+        alert(t("error_deleting_review"));
       }
     } catch (error) {
-      console.error("Error deleting review:", error);
-      alert("An error occurred. Please try again.");
+      console.error(t("error_occurred"), error);
+      alert(t("error_occurred"));
     }
   };
 
@@ -79,11 +93,11 @@ const OwnerReviews = () => {
       <NavBar />
       {userGroup === "Owners" && <OwnerMenu />}
       <div className="flex flex-1 flex-col items-center mt-16">
-        <h1 className="text-3xl font-bold mb-8">Reviews</h1>
+        <h1 className="text-3xl font-bold mb-8">{t("reviews")}</h1>
 
         {userGroup === "Owners" && reviews.length === 0 && (
           <p className="text-red-600 font-semibold mb-4">
-            No Reviews found.
+            {t("no_reviews_found")}
           </p>
         )}
 
@@ -91,11 +105,11 @@ const OwnerReviews = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100 text-center">
-                <th className="py-3 px-4 border-b">Guest Name</th>
-                <th className="py-3 px-4 border-b">Apartment ID</th>
-                <th className="py-3 px-4 border-b">Value</th>
-                <th className="py-3 px-4 border-b">Comment</th>
-                <th className="py-3 px-4 border-b">Actions</th>
+                <th className="py-3 px-4 border-b">{t("guest_name")}</th>
+                <th className="py-3 px-4 border-b">{t("apartment_id")}</th>
+                <th className="py-3 px-4 border-b">{t("value")}</th>
+                <th className="py-3 px-4 border-b">{t("comment")}</th>
+                <th className="py-3 px-4 border-b">{t("actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -118,13 +132,13 @@ const OwnerReviews = () => {
                       onClick={() => openUpdateModal(review)}
                       className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
                     >
-                      Update
+                      {t("update")}
                     </button>
                     <button
                       onClick={() => handleDelete(review.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
                     >
-                      Delete
+                      {t("delete")}
                     </button>
                   </td>
                 </tr>

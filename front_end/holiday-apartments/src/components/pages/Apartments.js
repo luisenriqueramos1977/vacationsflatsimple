@@ -5,8 +5,10 @@ import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 import OwnerMenu from '../owner/OwnerMenu';
 import CreateApartmentModal from '../owner/CreateApartmentModal'; // Import the modal component
+import { useTranslation } from 'react-i18next';
 
 const Apartments = () => {
+  const { t } = useTranslation();
   const [apartments, setApartments] = useState([]);
   const [locations, setLocations] = useState({});
   const [locationList, setLocationList] = useState([]);
@@ -49,14 +51,35 @@ const Apartments = () => {
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
-    const storedGroups = JSON.parse(localStorage.getItem("groups") || "[]");
+    let storedGroups = [];
 
-    if (storedUserId) {
-      setUserId(parseInt(storedUserId, 10));
-    }
+    const rawGroups = localStorage.getItem("groups");
+    console.log("Raw groups data from localStorage:", rawGroups);
 
-    if (storedGroups.includes("Owners")) {
-      setUserGroup("Owners");
+    try {
+      let parsedGroups;
+      // First try to parse as JSON
+      if (rawGroups) {
+        try {
+          parsedGroups = JSON.parse(rawGroups);
+        } catch (e) {
+          // If parsing fails, treat it as a plain string
+          parsedGroups = rawGroups;
+        }
+      }
+      
+      // Handle the parsed result
+      if (!rawGroups) {
+        storedGroups = [];
+      } else if (Array.isArray(parsedGroups)) {
+        storedGroups = parsedGroups;
+      } else {
+        // If it's a single item (either from JSON parse or plain string), wrap it in an array
+        storedGroups = [parsedGroups];
+      }
+    } catch (error) {
+      console.error("Error processing groups from localStorage:", error);
+      storedGroups = [];
     }
 
     const endpoint = storedGroups.includes("Owners") && storedUserId
@@ -85,7 +108,7 @@ const Apartments = () => {
   }, []);
 
   const handleDelete = async (apartmentId) => {
-    if (!window.confirm("Are you sure you want to delete this apartment?")) return;
+    if (!window.confirm(t("are_you_sure_delete_apartment"))) return;
 
     try {
       const response = await fetch(`http://localhost:8000/api/apartments/${apartmentId}/`, {
@@ -97,13 +120,13 @@ const Apartments = () => {
 
       if (response.ok) {
         setApartments((prev) => prev.filter((apt) => apt.id !== apartmentId));
-        alert("Apartment deleted successfully!");
+        alert(t("apartment_deleted_successfully"));
       } else {
-        alert("Error deleting apartment. Please try again.");
+        alert(t("error_deleting_apartment"));
       }
     } catch (error) {
       console.error("Error deleting apartment:", error);
-      alert("An error occurred. Please try again.");
+      alert(t("error_occurred_try_again"));
     }
   };
 
@@ -142,7 +165,7 @@ const Apartments = () => {
       }
 
       if (!response.ok) {
-        throw new Error("Failed to create/update apartment");
+        throw new Error(t("failed_create_update_apartment"));
       }
 
       const data = await response.json();
@@ -171,18 +194,18 @@ const Apartments = () => {
 
             if (!uploadResponse.ok) {
               const errorText = await uploadResponse.text();
-              throw new Error(`Failed to upload picture: ${errorText}`);
+              throw new Error(`${t("failed_upload_picture")}: ${errorText}`);
             }
           })
         );
       }
 
-      alert("Apartment created/updated successfully!");
+      alert(t("apartment_created_updated_successfully"));
       setIsModalOpen(false);
       window.location.reload();
     } catch (error) {
       console.error("Error creating/updating apartment:", error);
-      setError("Failed to create/update apartment. Please try again.");
+      setError(t("failed_create_update_apartment_try_again"));
     }
   };
 
@@ -231,11 +254,11 @@ const Apartments = () => {
       <NavBar />
       {userGroup === "Owners" && <OwnerMenu />}
       <div className="flex flex-1 flex-col items-center mt-16">
-        <h1 className="text-3xl font-bold mb-8">Apartments</h1>
+        <h1 className="text-3xl font-bold mb-8">{t("apartments")}</h1>
 
         {userGroup === "Owners" && apartments.length === 0 && (
           <p className="text-red-600 font-semibold mb-4">
-            No Apartments available, please create one.
+            {t("no_apartments_available")}
           </p>
         )}
 
@@ -244,7 +267,7 @@ const Apartments = () => {
             onClick={openCreateModal}
             className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-700"
           >
-            Create Apartment
+            {t("create_apartment")}
           </button>
         )}
 
@@ -280,10 +303,10 @@ const Apartments = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100 text-center">
-                <th className="py-3 px-4 border-b">Apartment Name</th>
-                <th className="py-3 px-4 border-b">Price</th>
-                <th className="py-3 px-4 border-b">Location</th>
-                {userGroup === "Owners" && <th className="py-3 px-4 border-b">Actions</th>}
+                <th className="py-3 px-4 border-b">{t("apartment_name")}</th>
+                <th className="py-3 px-4 border-b">{t("price")}</th>
+                <th className="py-3 px-4 border-b">{t("location")}</th>
+                {userGroup === "Owners" && <th className="py-3 px-4 border-b">{t("actions")}</th>}
               </tr>
             </thead>
             <tbody>
@@ -295,10 +318,10 @@ const Apartments = () => {
                     </Link>
                   </td>
                   <td className="py-3 px-4 border-b">
-                    {apartment.price} {currencies[apartment.currency] || 'Loading...'}
+                    {apartment.price} {currencies[apartment.currency] || t("loading")}
                   </td>
                   <td className="py-3 px-4 border-b">
-                    {locations[apartment.location] || 'Loading...'}
+                    {locations[apartment.location] || t("loading")}
                   </td>
                   {userGroup === "Owners" && (
                     <td className="py-3 px-4 border-b flex justify-center space-x-2">
@@ -306,13 +329,13 @@ const Apartments = () => {
                         onClick={() => openUpdateModal(apartment)}
                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
                       >
-                        Update
+                        {t("update")}
                       </button>
                       <button
                         onClick={() => handleDelete(apartment.id)}
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
                       >
-                        Delete
+                        {t("delete")}
                       </button>
                     </td>
                   )}

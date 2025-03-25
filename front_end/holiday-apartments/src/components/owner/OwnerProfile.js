@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import OwnerMenu from "./OwnerMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
+  
   // State to store user profile data
   const [profile, setProfile] = useState({
     username: "",
@@ -21,7 +24,7 @@ const ProfilePage = () => {
       const authToken = localStorage.getItem("token");
 
       if (!userId || !authToken) {
-        console.error("Missing user ID or authentication token.");
+        console.error(t("missing_authentication_details"));
         return;
       }
 
@@ -35,7 +38,7 @@ const ProfilePage = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch profile data (Status: ${response.status})`);
+          throw new Error(`${t("error_fetching_profile")} (Status: ${response.status})`);
         }
 
         const data = await response.json();
@@ -49,12 +52,12 @@ const ProfilePage = () => {
           groups: data.groups || [],
         });
       } catch (error) {
-        console.error("Error fetching profile:", error);
+        console.error(t("error_fetching_profile"), error);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [t]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -73,7 +76,7 @@ const ProfilePage = () => {
     const authToken = localStorage.getItem("token");
 
     if (!userId || !authToken) {
-      alert("Missing authentication details.");
+      alert(t("missing_authentication_details"));
       return;
     }
 
@@ -88,13 +91,13 @@ const ProfilePage = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update profile");
+        throw new Error(t("failed_to_update_profile"));
       }
 
-      alert("Profile updated successfully!");
+      alert(t("profile_updated_successfully"));
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile. Please try again.");
+      console.error(t("failed_to_update_profile"), error);
+      alert(t("failed_to_update_profile"));
     }
   };
 
@@ -106,13 +109,13 @@ const ProfilePage = () => {
 
       {/* Main Content */}
       <div className="ml-64 p-6 w-full">
-        <h1 className="text-3xl font-bold mb-4">Profile</h1>
-        <p className="text-gray-600">Update your profile information here.</p>
+        <h1 className="text-3xl font-bold mb-4">{t("profile")}</h1>
+        <p className="text-gray-600">{t("update_profile_info")}</p>
 
         {/* Profile Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700">{t("username")}</label>
             <input
               type="text"
               name="username"
@@ -123,7 +126,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">First Name</label>
+            <label className="block text-sm font-medium text-gray-700">{t("first_name")}</label>
             <input
               type="text"
               name="first_name"
@@ -134,7 +137,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700">{t("last_name")}</label>
             <input
               type="text"
               name="last_name"
@@ -145,7 +148,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email")}</label>
             <input
               type="email"
               name="email"
@@ -155,12 +158,11 @@ const ProfilePage = () => {
             />
           </div>
 
-          
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           >
-            Update Profile
+            {t("update_profile")}
           </button>
         </form>
       </div>

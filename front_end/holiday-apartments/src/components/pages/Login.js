@@ -1,78 +1,88 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
 
 const Login = () => {
-  const [user, setUser] = useState("");
+  const { t } = useTranslation();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-
     try {
       const response = await fetch("http://localhost:8000/api/auth/login/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, password: password })
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
+        const data = await response.json();
         localStorage.setItem("token", data.token);
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("username", data.username);
-        localStorage.setItem("groups", JSON.stringify(data.groups || [])); // Store user groups
-
-        // Check if user belongs to the "Owners" group
-        if (data.groups && data.groups.includes("Owners")) {
-          navigate("/owner/dashboard"); // Redirect to OwnerDashboard
-        } else {
-          navigate("/guest/dashboard"); // Redirect to GuestDashboard
-        }
+        localStorage.setItem("groups", data.groups);
+        navigate("/");
       } else {
-        setError(data.error || "Invalid credentials. Please try again.");
+        setError(t("login_failed"));
       }
     } catch (error) {
-      setError("Something went wrong. Please try again later.");
+      setError(t("login_error"));
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <div className="flex items-center justify-center w-full min-h-screen">
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96 text-center">
-          <h2 className="text-2xl mb-4">Login</h2>
-          {error && <div className="text-red-500 mb-4">{error}</div>}
-          <input
-            type="text"
-            placeholder="Username"
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
-          />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
-
-          {/* Links Container */}
-          <div className="flex justify-between mt-4">
-            <button onClick={() => navigate("/forgot-password")} className="text-blue-600 underline">
-              Forgot Password?
+      <div className="flex flex-col items-center justify-center flex-1">
+        <h1 className="text-3xl font-bold mb-4">{t("login")}</h1>
+        <form onSubmit={handleLogin} className="w-full max-w-sm">
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+              {t("username")}
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              {t("password")}
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          {error && <p className="text-red-500 text-xs italic">{error}</p>}
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              {t("login")}
             </button>
-            <button onClick={() => navigate("/register")} className="text-blue-600 underline">
-              Register here
-            </button>
+            <a
+              href="/forgot-password"
+              className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+            >
+              {t("forgot_password")}
+            </a>
           </div>
         </form>
       </div>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import OwnerMenu from "./GuestMenu";
+import GuestMenu from "./GuestMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
+
   // State to store user profile data
   const [profile, setProfile] = useState({
     username: "",
@@ -102,17 +105,17 @@ const ProfilePage = () => {
     <div className="flex min-h-screen">
       <NavBar />
       {/* Sidebar Menu */}
-      <OwnerMenu />
+      <GuestMenu />
 
       {/* Main Content */}
       <div className="ml-64 p-6 w-full">
-        <h1 className="text-3xl font-bold mb-4">Profile</h1>
-        <p className="text-gray-600">Update your profile information here.</p>
+        <h1 className="text-3xl font-bold mb-4">{t("profile")}</h1>
+        <p className="text-gray-600">{t("update_your_profile")}</p>
 
         {/* Profile Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700">{t("username")}</label>
             <input
               type="text"
               name="username"
@@ -123,7 +126,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">First Name</label>
+            <label className="block text-sm font-medium text-gray-700">{t("first_name")}</label>
             <input
               type="text"
               name="first_name"
@@ -134,7 +137,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700">{t("last_name")}</label>
             <input
               type="text"
               name="last_name"
@@ -145,7 +148,7 @@ const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">{t("email")}</label>
             <input
               type="email"
               name="email"
@@ -155,13 +158,11 @@ const ProfilePage = () => {
             />
           </div>
 
-
-
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           >
-            Update Profile
+            {t("save_changes")}
           </button>
         </form>
       </div>

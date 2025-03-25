@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../common/NavBar';
 import Footer from '../common/Footer';
 import OwnerMenu from '../owner/OwnerMenu';
+import { useTranslation } from 'react-i18next';
 
 const Guests = () => {
+  const { t } = useTranslation();
   const [guests, setGuests] = useState([]);
   const [userGroup, setUserGroup] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -12,7 +14,19 @@ const Guests = () => {
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
-    const storedGroups = JSON.parse(localStorage.getItem("groups") || "[]");
+    const rawGroups = localStorage.getItem("groups");
+    let storedGroups = [];
+    if (rawGroups) {
+      try {
+        // Attempt to parse as JSON
+        const parsed = JSON.parse(rawGroups);
+        // Handle both array and single string cases
+        storedGroups = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        // If JSON parsing fails, treat as plain string
+        storedGroups = [rawGroups];
+      }
+    }
 
     if (storedUserId) {
       setUserId(parseInt(storedUserId, 10));
@@ -68,7 +82,7 @@ const Guests = () => {
 
       setGuests(guestDetails);
     } catch (error) {
-      console.error("Error fetching guests:", error);
+      console.error(t("error_fetching_guests"), error);
     }
   };
 
@@ -77,11 +91,11 @@ const Guests = () => {
       <NavBar />
       {userGroup === "Owners" && <OwnerMenu />}
       <div className="flex flex-1 flex-col items-center mt-16">
-        <h1 className="text-3xl font-bold mb-8">Guests</h1>
+        <h1 className="text-3xl font-bold mb-8">{t("guests")}</h1>
 
         {userGroup === "Owners" && guests.length === 0 && (
           <p className="text-red-600 font-semibold mb-4">
-            No Guests found.
+            {t("no_guests_found")}
           </p>
         )}
 
@@ -89,10 +103,10 @@ const Guests = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100 text-center">
-                <th className="py-3 px-4 border-b">Username</th>
-                <th className="py-3 px-4 border-b">Email</th>
-                <th className="py-3 px-4 border-b">First Name</th>
-                <th className="py-3 px-4 border-b">Last Name</th>
+                <th className="py-3 px-4 border-b">{t("username")}</th>
+                <th className="py-3 px-4 border-b">{t("email")}</th>
+                <th className="py-3 px-4 border-b">{t("first_name")}</th>
+                <th className="py-3 px-4 border-b">{t("last_name")}</th>
               </tr>
             </thead>
             <tbody>

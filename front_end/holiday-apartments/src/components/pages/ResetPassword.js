@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const { token } = useParams(); // Get the reset token from the URL
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,7 +19,7 @@ const ResetPassword = () => {
     setMessage("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("passwords_do_not_match"));
       return;
     }
 
@@ -31,13 +33,13 @@ const ResetPassword = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Password has been reset successfully.");
+        setMessage(t("password_reset_success"));
         navigate("/login");
       } else {
-        setError(data.error || "Failed to reset password. Please try again.");
+        setError(data.error || t("failed_to_reset_password"));
       }
     } catch (error) {
-      setError("Something went wrong. Please try again later.");
+      setError(t("something_went_wrong"));
     }
   };
 
@@ -46,24 +48,24 @@ const ResetPassword = () => {
       <NavBar />
       <div className="flex items-center justify-center w-full min-h-screen">
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96 text-center">
-          <h2 className="text-2xl mb-4">Reset Password</h2>
+          <h2 className="text-2xl mb-4">{t("reset_password")}</h2>
           {message && <div className="text-green-500 mb-4">{message}</div>}
           {error && <div className="text-red-500 mb-4">{error}</div>}
           <input
             type="password"
-            placeholder="New Password"
+            placeholder={t("new_password")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-2 border rounded mb-4"
           />
           <input
             type="password"
-            placeholder="Confirm Password"
+            placeholder={t("confirm_password")}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full p-2 border rounded mb-4"
           />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Reset Password</button>
+          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">{t("reset_password")}</button>
         </form>
       </div>
       <Footer />
