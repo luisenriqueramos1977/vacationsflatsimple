@@ -43,7 +43,9 @@ docker-compose run web python manage.py createsuperuser
 
 To run the front-end with node.js
 
-vacationsflatsimple\front_end\holiday-apartments> npm start
+cd front_end\holiday-apartments
+
+npm start
 
 
 

@@ -27,6 +27,9 @@ const OwnerBookings = () => {
     const storedUserId = localStorage.getItem("user_id");
     const rawGroups = localStorage.getItem("groups");
     let storedGroups = [];
+
+    console.log("Stored user ID:", storedUserId); // Debug log  
+    console.log("Stored groups:", rawGroups); // Debug log  
     
     if (rawGroups) {
       try {
@@ -47,6 +50,7 @@ const OwnerBookings = () => {
 
     if (isGuest) {
       setUserGroup("Guests");
+      console.log("Fetching bookings for guest ID:", storedUserId); // Debug log
       fetchBookings(storedUserId);
     } else if (isOwner) {
       setUserGroup("Owners");
@@ -62,6 +66,7 @@ const OwnerBookings = () => {
       myHeaders.append("Authorization", `Token ${token}`);
 
       // Properly encoded guest_id parameter
+      console.log("Fetching bookings for guest ID:", guestId); // Debug log
       const response = await fetch(
         `http://localhost:8000/api/bookings/?guest_id=${encodeURIComponent(guestId)}`,
         {

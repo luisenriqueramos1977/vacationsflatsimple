@@ -44,6 +44,7 @@ const AppRoutes = () => {
         <Route path="/owner/reviews" element={<OwnerReviews />} /> {/* Add the OwnerReviews route */}
         <Route path="/guest/dashboard" element={<GuestDashboard />} />
         <Route path="/guest/profile" element={<GuestProfile />} />
+        <Route path="/guest/bookings" element={<OwnerBookings />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 page */}
 
