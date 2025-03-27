@@ -1,91 +1,72 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
-import { useTranslation } from "react-i18next";
 
-const Login = () => {
+const ForgotPassword = () => {
   const { t } = useTranslation();
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setMessage('');
+    setError('');
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, password: password })
+      const response = await fetch('http://localhost:8000/api/auth/forgot-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user_id", data.user_id);
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("groups", JSON.stringify(data.groups || [])); // Store user groups
-
-        // Check if user belongs to the "Owners" group
-        if (data.groups && data.groups.includes("Owners")) {
-          navigate("/owner/dashboard"); // Redirect to OwnerDashboard
-        } else {
-          navigate("/guest/dashboard"); // Redirect to GuestDashboard
-        }
-      } else {
-        setError(data.error || t("invalid_credentials"));
+      if (!response.ok) {
+        throw new Error(t('failed_to_send_reset_email'));
       }
+
+      setMessage(t('reset_email_sent_success'));
     } catch (error) {
-      setError(t("something_went_wrong"));
+      setError(error.message || t('something_went_wrong'));
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gray-100">
       <NavBar />
-      <div className="flex items-center justify-center w-full min-h-screen">
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96 text-center">
-          <h2 className="text-2xl mb-4">{t("login")}</h2>
-          {error && <div className="text-red-500 mb-4">{error}</div>}
-          <input
-            type="text"
-            placeholder={t("username")}
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
-          />
-          <input
-            type="password"
-            placeholder={t("password")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
-          />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">{t("login")}</button>
-
-          {/* Forgot Password Link */}
-          <p className="text-center mt-4">
-            <button onClick={() => navigate("/forgot-password")} className="text-blue-600 underline">
-              {t("forgot_password")}
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+          <h1 className="text-2xl font-bold mb-6">{t('reset_password')}</h1>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-gray-700 mb-2">
+                {t('email')}
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="w-full px-3 py-2 border rounded"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            {message && <p className="text-green-500 mb-4">{message}</p>}
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
+            >
+              {t('send_reset_link')}
             </button>
-          </p>
-
-          {/* Registration Link */}
-          <p className="text-center mt-4">
-            <span>{t("not_registered")}</span>
-            <button onClick={() => navigate("/register")} className="text-blue-600 underline">
-              {t("register_here")}
-            </button>
-          </p>
-        </form>
+          </form>
+        </div>
       </div>
       <Footer />
     </div>
   );
 };
 
-export default Login;
+export default ForgotPassword;
