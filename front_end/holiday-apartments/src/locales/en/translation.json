@@ -156,5 +156,8 @@
   "cancel": "Cancel",
   "select_apartment": "Select Apartment",
   "transaction_completed": "Transaction completed by",
-  "transaction_error": "An error occurred during the transaction. Please try again."
+  "transaction_error": "An error occurred during the transaction. Please try again.",
+  "enter_your_email": "Enter your email address",
+  "enter_the_subject": "Enter the Subject",
+  "enter_your_message": "Enter your Message"
 }

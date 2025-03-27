@@ -84,6 +84,17 @@ const Login = () => {
               {t("forgot_password")}
             </a>
           </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm">
+              {t("not_registered")}{" "}
+              <a
+                href="/register"
+                className="font-bold text-blue-500 hover:text-blue-800"
+              >
+                {t("register_here")}
+              </a>
+            </p>
+          </div>
         </form>
       </div>
       <Footer />

@@ -157,5 +157,8 @@
   "cancel": "Abbrechen",
   "select_apartment": "Wohnung auswählen",
   "transaction_completed": "Transaktion abgeschlossen von",
-  "transaction_error": "Ein Fehler ist während der Transaktion aufgetreten. Bitte versuchen Sie es erneut."
+  "transaction_error": "Ein Fehler ist während der Transaktion aufgetreten. Bitte versuchen Sie es erneut.",
+  "enter_your_email": "Geben Sie Ihre E-Mail-Adresse ein",
+  "enter_the_subject": "Geben Sie das Thema ein",
+  "enter_your_message": "Geben Sie Ihre Nachricht ein"
 }
