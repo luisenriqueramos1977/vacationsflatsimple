@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import OwnerMenu from "../owner/OwnerMenu";
 import NavBar from "../common/NavBar";
 import Footer from "../common/Footer";
+import { useTranslation } from "react-i18next";
 
 const OwnerDashboard = () => {
+  const { t } = useTranslation();
   const [totalApartments, setTotalApartments] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -13,31 +15,27 @@ const OwnerDashboard = () => {
     const fetchData = async () => {
       try {
         // Check if the user is an owner
-try {
-  const rawGroups = localStorage.getItem("groups");
-  let groups = [];
-  
-  if (rawGroups) {
-    try {
-      // Attempt to parse as JSON
-      const parsed = JSON.parse(rawGroups);
-      // Handle both array and single string cases
-      groups = Array.isArray(parsed) ? parsed : [parsed];
-    } catch {
-      // If JSON parsing fails, treat as plain string
-      groups = [rawGroups];
-    }
-  }
+        try {
+          const rawGroups = localStorage.getItem("groups");
+          let groups = [];
 
-  // Check for exact "Owners" string match
-  if (!groups.some(group => group === "Owners")) {
-    console.error("User is not an owner.");
-    return;
-  }
-} catch (error) {
-  console.error("Error checking owner status:", error);
-  return;
-}
+          if (rawGroups) {
+            try {
+              const parsed = JSON.parse(rawGroups);
+              groups = Array.isArray(parsed) ? parsed : [parsed];
+            } catch {
+              groups = [rawGroups];
+            }
+          }
+
+          if (!groups.some(group => group === "Owners")) {
+            console.error("User is not an owner.");
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking owner status:", error);
+          return;
+        }
 
         // Fetch user ID from local storage
         const userId = localStorage.getItem("user_id");
@@ -73,7 +71,6 @@ try {
           userApartmentIds.includes(booking.apartment)
         );
 
-        // Set the total number of bookings
         setTotalBookings(userBookings.length);
 
         // Fetch all reviews
@@ -85,7 +82,6 @@ try {
           userApartmentIds.includes(review.apartment)
         );
 
-        // Set the total number of reviews
         setTotalReviews(userReviews.length);
 
         // Calculate pending reviews
@@ -101,31 +97,25 @@ try {
   return (
     <div className="flex min-h-screen">
       <NavBar />
-      {/* Sidebar Menu */}
       <OwnerMenu />
 
-      {/* Main Content */}
       <div className="ml-64 p-6 w-full">
-        <h1 className="text-3xl font-bold mb-4">Owner Dashboard</h1>
-        <p className="text-gray-600">Manage your properties, guests, and bookings here.</p>
+        <h1 className="text-3xl font-bold mb-4">{t("owner_dashboard")}</h1>
+        <p className="text-gray-600">{t("manage_properties")}</p>
 
-        {/* Content Sections */}
         <div className="mt-6 grid grid-cols-3 gap-4">
-          {/* Total Apartments - Now Dynamic */}
           <div className="bg-blue-100 p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Total Apartments</h2>
+            <h2 className="text-lg font-semibold">{t("total_apartments")}</h2>
             <p className="text-xl font-bold">{totalApartments}</p>
           </div>
 
-          {/* Total Bookings - Now Dynamic */}
           <div className="bg-green-100 p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Total Bookings</h2>
+            <h2 className="text-lg font-semibold">{t("total_bookings")}</h2>
             <p className="text-xl font-bold">{totalBookings}</p>
           </div>
 
-          {/* Pending Reviews - Now Dynamic */}
           <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Pending Reviews</h2>
+            <h2 className="text-lg font-semibold">{t("pending_reviews")}</h2>
             <p className="text-xl font-bold">{pendingReviews}</p>
           </div>
         </div>

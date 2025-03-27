@@ -141,5 +141,21 @@
   "send_reset_link": "Link zum Zurücksetzen senden",
   "failed_to_send_reset_email": "E-Mail zum Zurücksetzen konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
   "reset_email_sent_success": "E-Mail zum Zurücksetzen erfolgreich gesendet!",
-  "something_went_wrong": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut."
+  "something_went_wrong": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+  "owner_dashboard": "Eigentümer-Dashboard",
+  "manage_properties": "Verwalten Sie hier Ihre Immobilien, Gäste und Buchungen.",
+  "total_apartments": "Gesamtwohnungen",
+  "total_bookings": "Gesamtbuchungen",
+  "pending_reviews": "Ausstehende Bewertungen",
+  "check_availability": "Verfügbarkeit prüfen",
+  "apartment": "Wohnung",
+  "start_date": "Startdatum",
+  "end_date": "Enddatum",
+  "total_price": "Gesamtpreis",
+  "no_availability": "Keine Verfügbarkeit für die ausgewählten Daten.",
+  "failed_to_check_availability": "Verfügbarkeit konnte nicht geprüft werden. Bitte versuchen Sie es erneut.",
+  "cancel": "Abbrechen",
+  "select_apartment": "Wohnung auswählen",
+  "transaction_completed": "Transaktion abgeschlossen von",
+  "transaction_error": "Ein Fehler ist während der Transaktion aufgetreten. Bitte versuchen Sie es erneut."
 }

@@ -141,6 +141,21 @@
   "send_reset_link": "Enviar Enlace de Restablecimiento",
   "failed_to_send_reset_email": "No se pudo enviar el correo de restablecimiento. Por favor, inténtelo de nuevo.",
   "reset_email_sent_success": "¡Correo de restablecimiento enviado con éxito!",
-  "something_went_wrong": "Algo salió mal. Por favor, inténtelo de nuevo."
+  "something_went_wrong": "Algo salió mal. Por favor, inténtelo de nuevo.",
+  "owner_dashboard": "Panel del Propietario",
+  "manage_properties": "Administre sus propiedades, huéspedes y reservas aquí.",
+  "total_apartments": "Total de Apartamentos",
+  "total_bookings": "Total de Reservas",
+  "pending_reviews": "Reseñas Pendientes",
+  "check_availability": "Verificar Disponibilidad",
+  "apartment": "Apartamento",
+  "start_date": "Fecha de Inicio",
+  "end_date": "Fecha de Fin",
+  "total_price": "Precio Total",
+  "no_availability": "No hay disponibilidad para las fechas seleccionadas.",
+  "failed_to_check_availability": "No se pudo verificar la disponibilidad. Por favor, inténtelo de nuevo.",
+  "cancel": "Cancelar",
+  "select_apartment": "Seleccionar Apartamento",
+  "transaction_completed": "Transacción completada por",
+  "transaction_error": "Ocurrió un error durante la transacción. Por favor, inténtelo de nuevo."
 } 
-}

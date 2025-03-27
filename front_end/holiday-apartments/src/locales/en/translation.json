@@ -140,5 +140,21 @@
   "send_reset_link": "Send Reset Link",
   "failed_to_send_reset_email": "Failed to send reset email. Please try again.",
   "reset_email_sent_success": "Reset email sent successfully!",
-  "something_went_wrong": "Something went wrong. Please try again."
+  "something_went_wrong": "Something went wrong. Please try again.",
+  "owner_dashboard": "Owner Dashboard",
+  "manage_properties": "Manage your properties, guests, and bookings here.",
+  "total_apartments": "Total Apartments",
+  "total_bookings": "Total Bookings",
+  "pending_reviews": "Pending Reviews",
+  "check_availability": "Check Availability",
+  "apartment": "Apartment",
+  "start_date": "Start Date",
+  "end_date": "End Date",
+  "total_price": "Total Price",
+  "no_availability": "No availability for the selected dates.",
+  "failed_to_check_availability": "Failed to check availability. Please try again.",
+  "cancel": "Cancel",
+  "select_apartment": "Select Apartment",
+  "transaction_completed": "Transaction completed by",
+  "transaction_error": "An error occurred during the transaction. Please try again."
 }

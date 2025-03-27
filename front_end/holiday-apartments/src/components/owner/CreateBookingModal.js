@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const CreateBookingModal = ({
   isOpen,
@@ -13,6 +14,7 @@ const CreateBookingModal = ({
   apartments,
   error,
 }) => {
+  const { t } = useTranslation();
   const [availabilityError, setAvailabilityError] = useState("");
   const [totalPrice, setTotalPrice] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState("$");
@@ -37,17 +39,17 @@ const CreateBookingModal = ({
         },
         onApprove: (data, actions) => {
           return actions.order.capture().then(details => {
-            alert('Transaction completed by ' + details.payer.name.given_name);
+            alert(t('transaction_completed') + ' ' + details.payer.name.given_name);
             onSubmit(); // Call the onSubmit function to handle the booking creation
           });
         },
         onError: (err) => {
           console.error('PayPal Checkout onError', err);
-          alert('An error occurred during the transaction. Please try again.');
+          alert(t('transaction_error'));
         },
       }).render('#paypal-button-container');
     }
-  }, [isAvailable, totalPrice, currencySymbol, onSubmit]);
+  }, [isAvailable, totalPrice, currencySymbol, onSubmit, t]);
 
   if (!isOpen) return null;
 
@@ -55,13 +57,13 @@ const CreateBookingModal = ({
     try {
       const response = await fetch(`http://localhost:8000/api/currencies/${currencyId}/`);
       if (!response.ok) {
-        throw new Error("Failed to fetch currency details");
+        throw new Error(t('failed_to_fetch_currency'));
       }
 
       const data = await response.json();
       return data.symbol;
     } catch (error) {
-      console.error("Error fetching currency symbol:", error);
+      console.error(t('error_fetching_currency_symbol'), error);
       return "$";
     }
   };
@@ -70,7 +72,7 @@ const CreateBookingModal = ({
     try {
       const response = await fetch(`http://localhost:8000/api/apartments/${apartmentId}/`);
       if (!response.ok) {
-        throw new Error("Failed to fetch apartment details");
+        throw new Error(t('failed_to_fetch_apartment_details'));
       }
 
       const data = await response.json();
@@ -82,11 +84,11 @@ const CreateBookingModal = ({
       const days = (end - start) / (1000 * 60 * 60 * 24);
 
       const totalPrice = dailyPrice * days;
-      console.log(`Calculated total price: ${totalPrice}`);
+      console.log(t('calculated_total_price') + `: ${totalPrice}`);
       setCurrencySymbol(currencySymbol);
       return totalPrice;
     } catch (error) {
-      console.error("Error fetching apartment price:", error);
+      console.error(t('error_fetching_apartment_price'), error);
       return null;
     }
   };
@@ -105,22 +107,22 @@ const CreateBookingModal = ({
 
       const response = await fetch(`http://localhost:8000/api/apartments/filter?${queryParams}`);
       if (!response.ok) {
-        throw new Error("Failed to check availability");
+        throw new Error(t('failed_to_check_availability'));
       }
 
       const data = await response.json();
 
       if (data.length === 0) {
-        setAvailabilityError("No availability for the selected dates.");
+        setAvailabilityError(t('no_availability'));
       } else {
         const totalPrice = await calculateTotalPrice(apartmentId, startDate, endDate);
         setTotalPrice(totalPrice);
         setIsAvailable(true);
-        console.log(`Total price set: ${totalPrice}`);
+        console.log(t('total_price_set') + `: ${totalPrice}`);
       }
     } catch (error) {
-      console.error("Error checking availability:", error);
-      setAvailabilityError("Failed to check availability. Please try again.");
+      console.error(t('error_checking_availability'), error);
+      setAvailabilityError(t('failed_to_check_availability'));
     }
   };
 
@@ -136,17 +138,17 @@ const CreateBookingModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Check Availability</h2>
+        <h2 className="text-xl font-bold mb-4">{t('check_availability')}</h2>
         <form onSubmit={onSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700">Apartment</label>
+            <label className="block text-gray-700">{t('apartment')}</label>
             <select
               value={apartmentId}
               onChange={(e) => setApartmentId(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
-              <option value="">Select Apartment</option>
+              <option value="">{t('select_apartment')}</option>
               {Object.entries(apartments).map(([id, name]) => (
                 <option key={id} value={id}>
                   {name}
@@ -155,7 +157,7 @@ const CreateBookingModal = ({
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Start Date</label>
+            <label className="block text-gray-700">{t('start_date')}</label>
             <input
               type="date"
               value={startDate}
@@ -165,7 +167,7 @@ const CreateBookingModal = ({
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">End Date</label>
+            <label className="block text-gray-700">{t('end_date')}</label>
             <input
               type="date"
               value={endDate}
@@ -178,7 +180,7 @@ const CreateBookingModal = ({
           {availabilityError && <p className="text-red-500 mb-4">{availabilityError}</p>}
           {totalPrice !== null && (
             <div className="mb-4">
-              <p className="text-green-500 mb-4">Total Price: {currencySymbol}{totalPrice}</p>
+              <p className="text-green-500 mb-4">{t('total_price')}: {currencySymbol}{totalPrice}</p>
               <div id="paypal-button-container"></div>
             </div>
           )}
@@ -189,7 +191,7 @@ const CreateBookingModal = ({
               onClick={handleCancel}
               className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600"
             >
-              Cancel
+              {t('cancel')}
             </button>
             {!isAvailable && (
               <button
@@ -197,7 +199,7 @@ const CreateBookingModal = ({
                 onClick={checkAvailability}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
               >
-                Check Availability
+                {t('check_availability')}
               </button>
             )}
           </div>
