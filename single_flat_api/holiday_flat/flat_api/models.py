@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Currency(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -142,5 +144,20 @@ class Facility(models.Model):
     customer_weighting = models.IntegerField()
     logo = models.ImageField(upload_to='facility_logos/', null=True, blank=True)
     attribution = models.CharField(max_length=255, null=True, blank=True)  # Allow null and blank values
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    reset_password_token = models.CharField(max_length=32, blank=True, null=True)
+
+# Signal to ensure a Profile is created for every User (new or existing)
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    else:
+        # Ensure existing users have a profile
+        if not hasattr(instance, 'profile'):
+            Profile.objects.create(user=instance)
+        instance.profile.save()
 
 

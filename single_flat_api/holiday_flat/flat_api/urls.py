@@ -15,7 +15,9 @@ from .views import (
     PictureViewSet,
     user_login,
     user_logout,
-    email_config_view
+    email_config_view,
+    forgot_password,
+    reset_password
 )
 #added on 22.12.2024
 from django.conf.urls import handler404
@@ -142,6 +144,8 @@ urlpatterns = [
     path('pictures/<int:pk>/', views.PictureViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='pictures-detail'),
     path('auth/login/', user_login, name='user-login'),
     path('auth/logout/', user_logout, name='user-logout'),
+    path('auth/forgot-password/', forgot_password, name='forgot_password'),
+    path('auth/reset-password/<str:token>/', reset_password, name='reset_password'),
     path('contact/', views.contact_view, name='contact-view'),
     path('email-config/', email_config_view, name='email_config'),
 ]

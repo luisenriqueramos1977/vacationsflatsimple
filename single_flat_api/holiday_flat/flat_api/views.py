@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets, mixins,  generics
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
-from .models import Location, Apartment, Review, Booking, Facility, Picture, Currency
+from .models import Location, Apartment, Review, Booking, Facility, Picture, Currency, Profile
 from .serializers import (
     LocationSerializer,
     ApartmentSerializer,
@@ -598,4 +598,92 @@ def email_config_view(request):
                     file.write(line)
 
         return Response({"success": "Email configuration updated successfully."}, status=status.HTTP_200_OK)
+    
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.urls import reverse
+
+@csrf_exempt
+def forgot_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        
+        if not email:
+            return JsonResponse({'error': 'Email is required'}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User with this email does not exist'}, status=404)
+
+        # Ensure the user has a profile (create if missing)
+        profile, created = Profile.objects.get_or_create(user=user)  # Critical fix
+
+        # Generate a random token
+        token = get_random_string(length=32)
+        profile.reset_password_token = token
+        profile.save()  # Save the profile with the new token
+
+        # Create a password reset link
+        reset_link = request.build_absolute_uri(
+            reverse('reset_password', args=[token])
+        )
+
+        # Send the email (use the user's email, not a hardcoded one)
+        try:
+            send_mail(
+                'Password Reset Request',
+                f'Click the link to reset your password: {reset_link}',
+                'info@tropifruechte.de',  # Use a generic sender
+                [user.email],  # Send to the user's actual email
+                fail_silently=False,
+            )
+            return JsonResponse({'message': 'Password reset email sent successfully'})
+        
+        except Exception as e:
+            return JsonResponse(
+                {'error': f'Failed to send email: {str(e)}'}, 
+                status=500
+            )
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.utils.crypto import get_random_string
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def reset_password(request, token):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_password = data.get('new_password')
+
+        if not new_password:
+            return JsonResponse({'error': 'New password is required'}, status=400)
+
+        try:
+            profile = Profile.objects.get(reset_password_token=token)
+            user = profile.user
+            user.set_password(new_password)
+            user.save()
+
+            # Clear the token after successful password reset
+            profile.reset_password_token = None
+            profile.save()
+
+            return JsonResponse({'message': 'Password reset successfully'})
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'Invalid or expired token'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
