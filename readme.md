@@ -1,11 +1,11 @@
-Vacation Flat Simple is an API application that lets you create and administrate
+Vacation Flat Simple is an API application that lets you create and administer
 vacational flats. 
 
 Owners can create flats, locations, guests, modify reviews and facilities.
-Guests can create booking and add reviews to apartments. 
+Guests can create a booking and add reviews to apartments. 
 
 
-To run the back end of this application do as following:
+To run the back end of this application, do the following:
 
 cd single_flat_api
 
@@ -13,7 +13,7 @@ flat_env\Scripts\activate #activa el env
 cd holiday_flat
 python manage.py runserver # to run with django server
 
-to run this app with docker:
+To run this app with Docker:
 
 docker-compose build
 docker-compose up
@@ -35,11 +35,11 @@ endpoints:
  /api/facilities/ Facilities provided by apartemtns
 /api/currencies/ currency of prices
 
-1. create some locations
-2. create some currencies
-3. create superuser:
+1. Create some locations
+2. Create some currencies
+3. Create superuser:
 docker-compose run web python manage.py createsuperuser
-4. create Owners and Guests group from http://localhost:8000/admin/
+4. Create Owners and Guests group from http://localhost:8000/admin/
 
 To run the front-end with node.js
 
